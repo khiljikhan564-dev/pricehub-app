@@ -1,55 +1,104 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PriceHub Global</title>
-<style>
-  body { font-family: Arial, sans-serif; background: #f3f4f6; margin: 0; }
-  header { background: #312e81; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
-  select, input { padding: 10px 14px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-  .container { max-width: 800px; margin: 24px auto; padding: 0 16px; }
-  .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-  .search-box input { flex: 1; }
-  .btn { background: #312e81; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-  .card { background: white; padding: 16px 20px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-  .price { color: #16a34a; font-size: 20px; font-weight: bold; margin-right: 14px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a73e8">
+  <title>PriceHub Global - Compare Worldwide Prices</title>
+  <link rel="icon" type="image/png" href="https://flaticon.com">
+  <style>
+    body{font-family:system-ui,sans-serif;background:#f4f6f9;margin:0;padding:16px}
+    .box{max-width:720px;margin:auto;background:#fff;padding:20px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+    .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+    h2{margin:0;color:#1a73e8}
+    .apk-btn{background:#0f9d58;color:#fff;padding:9px 14px;text-decoration:none;border-radius:8px;font-weight:bold;font-size:13px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    select,input,button{padding:11px;border-radius:8px;border:1px solid #ccc;font-size:15px}
+    input{flex:1;min-width:160px}
+    button{background:#1a73e8;color:#fff;border:none;cursor:pointer;font-weight:bold}
+    .card{display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid #eee;border-radius:10px;margin-top:10px;background:#fafafa}
+    .price{font-size:18px;font-weight:bold;color:#0f9d58}
+    .btn{background:#ff9900;color:#fff;padding:9px 15px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px}
+  </style>
 </head>
 <body>
-<header>
-  <h2>🌐 PriceHub Global</h2>
-  <select id="country" onchange="searchPrices()">
-    <option value="PK">🇵🇰 Pakistan (PKR - Urdu/Eng)</option>
-    <option value="US">🇺🇸 USA (USD - English)</option>
-    <option value="AE">🇦🇪 UAE / Saudi (AED - Arabic)</option>
-    <option value="CN">🇨🇳 China (CNY - Chinese)</option>
-    <option value="UK">🇬🇧 UK & Europe (GBP - Eng)</option>
-    <option value="IN">🇮🇳 India (INR - Hindi)</option>
-  </select>
-</header>
-<div class="container">
-  <div class="search-box">
-    <input id="query" value="Smart Watch" placeholder="Search any product...">
-    <button class="btn" onclick="searchPrices()">Search</button>
+<div class="box">
+  <div class="top">
+    <h2>PriceHub Global</h2>
+    <a class="apk-btn" href="https://huggingface.co">Download Android App (APK)</a>
   </div>
-  <div id="results"></div>
+  <div class="row">
+    <select id="country" onchange="search()">
+      <option value="PK">Pakistan (PKR)</option>
+      <option value="US">USA (USD)</option>
+      <option value="AE">UAE (AED)</option>
+      <option value="SA">Saudi Arabia (SAR)</option>
+      <option value="GB">UK (GBP)</option>
+      <option value="IN">India (INR)</option>
+      <option value="DE">Germany (EUR)</option>
+    </select>
+    <input id="q" value="Smart Watch" placeholder="Search any product..." onkeyup="if(event.key==='Enter')search()">
+    <button onclick="search()">Search</button>
+  </div>
+  <div id="list"></div>
 </div>
 <script>
-async function searchPrices() {
-  const q = document.getElementById('query').value;
-  const c = document.getElementById('country').value;
-  const res = await fetch(`http://localhost:8000/search?query=${q}&country=${c}`);
-  const data = await res.json();
-  document.getElementById('query').placeholder = data.placeholder;
-  document.getElementById('results').innerHTML = data.results.map(item => `
+const DATA = {
+  PK: [
+    {s:"Daraz Pakistan", p:"Rs. 4,250", d:"2-4 Days", u:q=>`https://daraz.pk{q}`},
+    {s:"AliExpress", p:"Rs. 3,100", d:"10-18 Days", u:q=>`https://aliexpress.com{q}`},
+    {s:"Amazon Global", p:"Rs. 6,900", d:"3-6 Days", u:q=>`https://amazon.com{q}`},
+    {s:"Alibaba Wholesale", p:"Rs. 2,150", d:"7-15 Days", u:q=>`https://alibaba.com{q}`},
+    {s:"Temu Pakistan", p:"Rs. 2,890", d:"6-12 Days", u:q=>`https://temu.com{q}`}
+  ],
+  US: [
+    {s:"Amazon USA", p:"$24.99", d:"1-2 Days", u:q=>`https://amazon.com{q}`},
+    {s:"Walmart", p:"$22.50", d:"2 Days", u:q=>`https://walmart.com{q}`},
+    {s:"eBay Global", p:"$19.99", d:"3-5 Days", u:q=>`https://ebay.com{q}`},
+    {s:"AliExpress", p:"$11.20", d:"10-15 Days", u:q=>`https://aliexpress.com{q}`},
+    {s:"Alibaba Wholesale", p:"$7.80", d:"7-12 Days", u:q=>`https://alibaba.com{q}`}
+  ],
+  AE: [
+    {s:"Noon UAE", p:"AED 89", d:"Same Day", u:q=>`https://noon.com{q}`},
+    {s:"Amazon.ae", p:"AED 95", d:"1 Day", u:q=>`https://amazon.ae{q}`},
+    {s:"AliExpress", p:"AED 42", d:"8-14 Days", u:q=>`https://aliexpress.com{q}`},
+    {s:"Alibaba Wholesale", p:"AED 29", d:"7-12 Days", u:q=>`https://alibaba.com{q}`}
+  ],
+  SA: [
+    {s:"Noon KSA", p:"SAR 92", d:"1-2 Days", u:q=>`https://noon.com{q}`},
+    {s:"Amazon.sa", p:"SAR 99", d:"1-2 Days", u:q=>`https://amazon.sa{q}`},
+    {s:"AliExpress", p:"SAR 44", d:"8-15 Days", u:q=>`https://aliexpress.com{q}`}
+  ],
+  GB: [
+    {s:"Amazon UK", p:"£21.99", d:"1 Day", u:q=>`https://amazon.co.uk{q}`},
+    {s:"eBay UK", p:"£18.50", d:"2-4 Days", u:q=>`https://ebay.co.uk{q}`},
+    {s:"AliExpress", p:"£9.80", d:"8-14 Days", u:q=>`https://aliexpress.com{q}`}
+  ],
+  IN: [
+    {s:"Flipkart", p:"₹1,899", d:"2-3 Days", u:q=>`https://flipkart.com{q}`},
+    {s:"Amazon.in", p:"₹2,099", d:"1-2 Days", u:q=>`https://amazon.in{q}`},
+    {s:"Alibaba Wholesale", p:"₹690", d:"7-15 Days", u:q=>`https://alibaba.com{q}`}
+  ],
+  DE: [
+    {s:"Amazon.de", p:"€23.99", d:"1-2 Days", u:q=>`https://amazon.de{q}`},
+    {s:"eBay.de", p:"€19.90", d:"2-4 Days", u:q=>`https://ebay.de{q}`},
+    {s:"AliExpress", p:"€10.50", d:"8-14 Days", u:q=>`https://aliexpress.com{q}`}
+  ]
+};
+function search(){
+  const c = document.getElementById("country").value;
+  const raw = document.getElementById("q").value.trim() || "Smart Watch";
+  const q = encodeURIComponent(raw);
+  document.getElementById("list").innerHTML = (DATA[c]||DATA.US).map(x => `
     <div class="card">
-      <div><strong>${item.store}</strong><br><small>Delivery: ${item.delivery}</small></div>
-      <div><span class="price">${item.price}</span>
-      <a href="${item.url}" target="_blank"><button class="btn">${data.buy_text}</button></a></div>
+      <div><b>${x.s} (${raw})</b><br><small>Delivery: ${x.d}</small></div>
+      <div class="price">${x.p}</div>
+      <a class="btn" href="${x.u(q)}" target="_blank" rel="noopener noreferrer">Open Store</a>
     </div>
-  `).join('');
+  `).join("");
 }
-searchPrices();
+search();
 </script>
 </body>
 </html>
+
