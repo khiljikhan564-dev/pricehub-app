@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PriceHub Global</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f3f4f6; margin: 0; }
+  header { background: #312e81; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  select, input { padding: 10px 14px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+  .container { max-width: 800px; margin: 24px auto; padding: 0 16px; }
+  .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+  .search-box input { flex: 1; }
+  .btn { background: #312e81; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+  .card { background: white; padding: 16px 20px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .price { color: #16a34a; font-size: 20px; font-weight: bold; margin-right: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <h2>🌐 PriceHub Global</h2>
+  <select id="country" onchange="searchPrices()">
+    <option value="PK">🇵🇰 Pakistan (PKR - Urdu/Eng)</option>
+    <option value="US">🇺🇸 USA (USD - English)</option>
+    <option value="AE">🇦🇪 UAE / Saudi (AED - Arabic)</option>
+    <option value="CN">🇨🇳 China (CNY - Chinese)</option>
+    <option value="UK">🇬🇧 UK & Europe (GBP - Eng)</option>
+    <option value="IN">🇮🇳 India (INR - Hindi)</option>
+  </select>
+</header>
+<div class="container">
+  <div class="search-box">
+    <input id="query" value="Smart Watch" placeholder="Search any product...">
+    <button class="btn" onclick="searchPrices()">Search</button>
+  </div>
+  <div id="results"></div>
+</div>
+<script>
+async function searchPrices() {
+  const q = document.getElementById('query').value;
+  const c = document.getElementById('country').value;
+  const res = await fetch(`http://localhost:8000/search?query=${q}&country=${c}`);
+  const data = await res.json();
+  document.getElementById('query').placeholder = data.placeholder;
+  document.getElementById('results').innerHTML = data.results.map(item => `
+    <div class="card">
+      <div><strong>${item.store}</strong><br><small>Delivery: ${item.delivery}</small></div>
+      <div><span class="price">${item.price}</span>
+      <a href="${item.url}" target="_blank"><button class="btn">${data.buy_text}</button></a></div>
+    </div>
+  `).join('');
+}
+searchPrices();
+</script>
+</body>
+</html>
