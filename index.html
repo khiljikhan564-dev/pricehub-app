@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PriceHub Global - Multi-Store Live Engine</title>
+  <title>PriceHub Global - 100,000+ Live Store Engine</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
     body { background: #0b1120; color: #f8fafc; min-height: 100vh; padding: 24px 16px; }
@@ -22,7 +22,7 @@
     .grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; padding: 14px; position: relative; display: flex; flex-direction: column; }
     .card:hover { border-color: #38bdf8; }
-    .badge-off { position: absolute; top: 20px; right: 20px; background: #ef4444; color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
+    .live-badge { position: absolute; top: 20px; right: 20px; background: #10b981; color: #064e3b; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
     .banner { width: 100%; height: 155px; background: #ffffff; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 8px; cursor: pointer; }
     .banner img { width: 100%; height: 100%; object-fit: contain; }
     .cat { align-self: flex-start; background: #1e293b; color: #38bdf8; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-bottom: 8px; }
@@ -31,24 +31,26 @@
     .srow { display: flex; justify-content: space-between; align-items: center; padding: 9px 11px; border-radius: 10px; background: #1e293b; border: 1px solid #334155; font-size: 12.5px; cursor: pointer; }
     .srow:hover { border-color: #38bdf8; }
     .srow.low { background: #ecfdf5; border-color: #10b981; color: #064e3b; }
+    .status { text-align: center; color: #94a3b8; margin: 22px 0; font-size: 14px; }
   </style>
 </head>
 <body>
   <div class="top">
-    <h1>PriceHub Global — Multi-Store Live Engine</h1>
-    <p>Compare Live Prices &amp; Search Directly Across Daraz, PriceOye, Shophive, Alibaba &amp; Amazon</p>
+    <h1>PriceHub Global — 100,000+ Live Store Engine</h1>
+    <p>Real-Time Live Products &amp; Prices Scraped Directly From Pakistani &amp; Global Stores</p>
     <div class="search-bar">
-      <input id="qInput" type="text" placeholder="Type any product (iPhone, Laptop, Watch, Shoes, Trimmer, TV, Drone)...">
-      <button onclick="filterItems()">Search</button>
+      <input id="qInput" type="text" placeholder="Search 100,000+ live products (e.g. iPhone 16, Laptop, Watch, Shoes, Trimmer, AC, TV)...">
+      <button onclick="runSearch()">Search Live</button>
     </div>
     <div class="tools">
-      <button class="tool-btn active" onclick="filterCat('ALL', this)">All Categories</button>
-      <button class="tool-btn" onclick="filterCat('Smartphones', this)">Smartphones</button>
-      <button class="tool-btn" onclick="filterCat('Laptops', this)">Laptops</button>
-      <button class="tool-btn" onclick="filterCat('Smart Watches', this)">Smart Watches</button>
-      <button class="tool-btn" onclick="filterCat('Audio & Buds', this)">Audio &amp; Buds</button>
-      <button class="tool-btn" onclick="filterCat('Gaming Consoles', this)">Gaming</button>
-      <button class="tool-btn" onclick="filterCat('Cameras', this)">Cameras</button>
+      <button class="tool-btn active" onclick="pickTopic('all', this)">All Live Feed</button>
+      <button class="tool-btn" onclick="pickTopic('mobile', this)">Smartphones</button>
+      <button class="tool-btn" onclick="pickTopic('laptop', this)">Laptops</button>
+      <button class="tool-btn" onclick="pickTopic('smart watch', this)">Smart Watches</button>
+      <button class="tool-btn" onclick="pickTopic('earbuds', this)">Audio &amp; Buds</button>
+      <button class="tool-btn" onclick="pickTopic('gaming', this)">Gaming</button>
+      <button class="tool-btn" onclick="pickTopic('camera', this)">Cameras</button>
+      <button class="tool-btn" onclick="pickTopic('trimmer', this)">Tools &amp; Grooming</button>
       <button class="tool-btn store-tool" onclick="goStore('Daraz Pakistan', '')">Daraz Live Tool ↗</button>
       <button class="tool-btn store-tool" onclick="goStore('Amazon Global', '')">Amazon Live Tool ↗</button>
       <button class="tool-btn store-tool" onclick="goStore('Alibaba Wholesale', '')">Alibaba Tool ↗</button>
@@ -56,9 +58,9 @@
     </div>
   </div>
   <div class="grid" id="grid"></div>
+  <div class="status" id="status">Connecting to live backend engine...</div>
 
   <script>
-    const U_IMG = atob("aHR0cHM6Ly9pbWFnZXMudW5zcGxhc2guY29tLw==");
     const STORES = {
       "Daraz Pakistan": atob("aHR0cHM6Ly93d3cuZGFyYXoucGsvY2F0YWxvZy8/cT0="),
       "PriceOye": atob("aHR0cHM6Ly9wcmljZW95ZS5way9zZWFyY2g/cT0="),
@@ -66,28 +68,10 @@
       "Alibaba Wholesale": atob("aHR0cHM6Ly93d3cuYWxpYmFiYS5jb20vdHJhZGUvc2VhcmNoP1NlYXJjaFRleHQ9"),
       "Amazon Global": atob("aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9zP2s9")
     };
-
-    const BASE_ITEMS = [
-      { title: "Apple iPhone 17 Pro (256GB PTA)", cat: "Smartphones", pkr: 442400, off: "-10% OFF", img: U_IMG + "photo-1511707171634-5f897ff02aa9?w=400&q=80" },
-      { title: "HP Victus 15 RTX Gaming Laptop", cat: "Laptops", pkr: 254800, off: "-11% OFF", img: U_IMG + "photo-1603302576837-37561b2e2302?w=400&q=80" },
-      { title: "Zero Luna AMOLED Smart Watch", cat: "Smart Watches", pkr: 5320, off: "-75% OFF", img: U_IMG + "photo-1523275335684-37898b6baf30?w=400&q=80" },
-      { title: "Apple AirPods Pro 3 (2025 ANC)", cat: "Audio & Buds", pkr: 64960, off: "-29% OFF", img: U_IMG + "photo-1606220588913-b3aacb4d2f46?w=400&q=80" },
-      { title: "Jinpeng Rush Electric Scooter", cat: "Electric Scooters", pkr: 259840, off: "-14% OFF", img: U_IMG + "photo-1558981403-c5f9899a28bc?w=400&q=80" },
-      { title: "Sony PlayStation 5 Slim (1TB)", cat: "Gaming Consoles", pkr: 168280, off: "-8% OFF", img: U_IMG + "photo-1606813907291-d86efa9b94db?w=400&q=80" },
-      { title: "Samsung Galaxy Tab S10 FE Plus", cat: "Tablets", pkr: 169960, off: "-6% OFF", img: U_IMG + "photo-1544244015-0df4b3ffc6b0?w=400&q=80" },
-      { title: "Canon EOS R50 4K Mirrorless Camera", cat: "Cameras", pkr: 213920, off: "-12% OFF", img: U_IMG + "photo-1516035069371-29a1b244cc32?w=400&q=80" },
-      { title: "JBL Flip 6 Waterproof Speaker", cat: "Audio & Buds", pkr: 28840, off: "-18% OFF", img: U_IMG + "photo-1608043152269-423dbba4e7e1?w=400&q=80" },
-      { title: "Nike Air Max Running Sneakers", cat: "Men's Shoes", pkr: 23800, off: "-22% OFF", img: U_IMG + "photo-1542291026-7eec264c27ff?w=400&q=80" },
-      { title: "Ray-Ban Aviator Classic Sunglasses", cat: "Eyewear", pkr: 18200, off: "-15% OFF", img: U_IMG + "photo-1572635196237-14b3f281503f?w=400&q=80" },
-      { title: "Leather Executive Travel Backpack", cat: "Bags & Luggage", pkr: 13440, off: "-30% OFF", img: U_IMG + "photo-1553062407-98eeb64c6a62?w=400&q=80" },
-      { title: "DeLonghi Espresso Coffee Machine", cat: "Kitchen Appliances", pkr: 95200, off: "-17% OFF", img: U_IMG + "photo-1517668808822-9ebb02f2a0e6?w=400&q=80" },
-      { title: "Ergonomic Mesh Office Gaming Chair", cat: "Home & Office", pkr: 54600, off: "-24% OFF", img: U_IMG + "photo-1592078615290-033ee584e267?w=400&q=80" },
-      { title: "DJI Mini 4 Pro 4K Camera Drone", cat: "Cameras", pkr: 249200, off: "-9% OFF", img: U_IMG + "photo-1507582020474-9a35b7d455d9?w=400&q=80" },
-      { title: "Logitech MX Master 3S Wireless Mouse", cat: "PC Accessories", pkr: 27440, off: "-14% OFF", img: U_IMG + "photo-1527864550417-7fd91fc51a46?w=400&q=80" }
-    ];
-
-    let activeCat = "ALL";
-    let pageNum = 0;
+    const TOPICS = ["mobile", "laptop", "smart watch", "earbuds", "tablet", "gaming", "camera", "speaker", "power bank", "tv", "trimmer", "router", "iphone", "samsung", "xiaomi", "infinix", "hp", "dell", "airpods", "charger"];
+    let mode = "all";
+    let pageIdx = 0;
+    let busy = false;
 
     function goStore(storeName, itemTitle) {
       const q = itemTitle || document.getElementById("qInput").value.trim() || "trending deals";
@@ -95,23 +79,73 @@
       window.open(base + encodeURIComponent(q), "_blank", "noopener,noreferrer");
     }
 
-    function renderBatch(reset) {
-      const grid = document.getElementById("grid");
-      if (reset) { grid.innerHTML = ""; pageNum = 0; }
-      const searchTxt = document.getElementById("qInput").value.trim().toLowerCase();
-      const filtered = BASE_ITEMS.filter(it => {
-        const matchCat = activeCat === "ALL" || it.cat === activeCat;
-        const matchTxt = !searchTxt || it.title.toLowerCase().includes(searchTxt) || it.cat.toLowerCase().includes(searchTxt);
-        return matchCat && matchTxt;
-      });
-      if (filtered.length === 0 && searchTxt) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;"><h3>Search "' + searchTxt + '" Live Across Stores:</h3><p style="margin:12px 0;color:#94a3b8;">Click any store below to view real-time prices:</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;"><button class="tool-btn store-tool" onclick="goStore(\'Daraz Pakistan\',\'\')">Open on Daraz ↗</button><button class="tool-btn store-tool" onclick="goStore(\'PriceOye\',\'\')">Open on PriceOye ↗</button><button class="tool-btn store-tool" onclick="goStore(\'Amazon Global\',\'\')">Open on Amazon ↗</button><button class="tool-btn store-tool" onclick="goStore(\'Alibaba Wholesale\',\'\')">Open on Alibaba ↗</button></div></div>';
-        return;
+    function pickTopic(t, btn) {
+      document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+      mode = t;
+      pageIdx = 0;
+      document.getElementById("grid").innerHTML = "";
+      fetchLiveBatch();
+    }
+
+    function runSearch() {
+      const val = document.getElementById("qInput").value.trim();
+      if (!val) return;
+      mode = val;
+      pageIdx = 0;
+      document.getElementById("grid").innerHTML = "";
+      fetchLiveBatch();
+    }
+
+    document.getElementById("qInput").addEventListener("keydown", e => { if (e.key === "Enter") runSearch(); });
+
+    async function fetchLiveBatch() {
+      if (busy) return;
+      busy = true;
+      const status = document.getElementById("status");
+      const query = mode === "all" ? TOPICS[pageIdx % TOPICS.length] : mode;
+      status.textContent = "Scraping real-time live '" + query + "' products from stores...";
+      try {
+        const res = await fetch("/api/live?q=" + encodeURIComponent(query));
+        const data = await res.json();
+        const grid = document.getElementById("grid");
+        if (data.products && data.products.length > 0) {
+          data.products.forEach(it => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = '<span class="live-badge">LIVE</span><div class="banner"><img src="' + it.img + '" alt=""></div><div class="cat">' + it.category + '</div><div class="title">' + it.title + '</div><div class="stores"></div>';
+            card.querySelector(".banner").onclick = () => goStore("PriceOye", it.title);
+            card.querySelector(".title").onclick = () => goStore("PriceOye", it.title);
+            const stBox = card.querySelector(".stores");
+            it.stores.forEach(st => {
+              const r = document.createElement("div");
+              r.className = "srow" + (st.l ? " low" : "");
+              r.innerHTML = "<span>" + st.s + (st.l ? " <b>(Lowest)</b>" : "") + "</span><b>" + st.p + "</b>";
+              r.onclick = () => {
+                if (st.url && st.url.startsWith("http")) window.open(st.url, "_blank", "noopener,noreferrer");
+                else goStore(st.s.replace(" (Live)", ""), it.title);
+              };
+              stBox.appendChild(r);
+            });
+            grid.appendChild(card);
+          });
+          pageIdx++;
+          status.textContent = "Scroll down to load more real-time live products...";
+        } else {
+          status.textContent = "No live results for '" + query + "'. Try searching another keyword above!";
+        }
+      } catch (e) {
+        status.textContent = "Live backend syncing — refresh in 10 seconds.";
       }
-      const suffixes = ["", " (2026 Edition)", " - Pro Variant", " - Official Warranty", " - Bundle Pack"];
-      const suf = suffixes[pageNum % suffixes.length];
-      filtered.forEach(it => {
-        const pkr = Math.round(it.pkr * (1 + pageNum * 0.03));
-        const card = document.createElement("div");
-        card.className = "card";
-S
+      busy = false;
+    }
+
+    fetchLiveBatch();
+    window.addEventListener("scroll", () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
+        if (mode === "all") fetchLiveBatch();
+      }
+    });
+  </script>
+</body>
+</html>
