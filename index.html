@@ -57,7 +57,7 @@
     </div>
   </div>
   <div class="grid" id="grid"></div>
-  <div class="status" id="status">Loading mixed live products...</div>
+  <div class="status" id="status">Loading live products...</div>
 
   <script>
     var STORES = {
@@ -67,7 +67,7 @@
       "Alibaba Wholesale": atob("aHR0cHM6Ly93d3cuYWxpYmFiYS5jb20vdHJhZGUvc2VhcmNoP1NlYXJjaFRleHQ9"),
       "Amazon Global": atob("aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9zP2s9")
     };
-    var TOPICS = ["phone", "watch", "laptop", "shoes", "bag", "sunglasses", "perfume", "shirt", "furniture", "kitchen", "car", "motorcycle", "beauty", "groceries", "sports", "tablet"];
+    var TOPICS = ["trending", "watch", "phone", "laptop", "shoes", "bag", "sunglasses", "perfume", "shirt", "kitchen", "sports", "tablet"];
     var seenTitles = {};
     var mode = "all";
     var pageIdx = 0;
@@ -136,52 +136,49 @@
       }
     };
 
-    async function fetchOneQuery(q) {
-      var res = await fetch("/api/live?q=" + encodeURIComponent(q));
-      if (!res.ok) return [];
-      var data = await res.json();
-      return (data && data.products) ? data.products : [];
-    }
-
     async function fetchLiveBatch() {
       if (busy) return;
       busy = true;
       var status = document.getElementById("status");
       var grid = document.getElementById("grid");
-      status.textContent = "Loading live multi-store prices...";
+      var q = mode === "all" ? TOPICS[pageIdx % TOPICS.length] : mode;
+      status.textContent = "Loading live '" + q + "' prices...";
       try {
-        var finalItems = [];
-        if (mode === "all") {
-          var batchTopics = [];
-          for (var k = 0; k < 4; k++) {
-            batchTopics.push(TOPICS[(pageIdx * 4 + k) % TOPICS.length]);
-          }
-          var lists = await Promise.all(batchTopics.map(fetchOneQuery));
-          for (var round = 0; round < 3; round++) {
-            lists.forEach(function(subList) {
-              if (subList && subList.length > round) {
-                var cand = subList.slice(round, round + 1).pop();
-                if (cand && !seenTitles[cand.title]) {
-                  seenTitles[cand.title] = true;
-                  finalItems.push(cand);
-                }
-              }
-            });
-          }
-        } else {
-          var singleList = await fetchOneQuery(mode);
-          singleList.forEach(function(cand) {
-            if (!seenTitles[cand.title]) {
-              seenTitles[cand.title] = true;
-              finalItems.push(cand);
-            }
-          });
-        }
-
-        if (finalItems.length > 0) {
-          finalItems.forEach(function(it) {
+        var res = await fetch("/api/live?q=" + encodeURIComponent(q));
+        var data = await res.json();
+        var list = (data && data.products) ? data.products : [];
+        var added = 0;
+        list.forEach(function(it) {
+          if (!seenTitles[it.title]) {
+            seenTitles[it.title] = true;
+            added++;
             var card = document.createElement("div");
             card.className = "card";
             card.innerHTML = '<span class="live-badge">LIVE</span><div class="banner"><img src="' + it.img + '" alt=""></div><div class="title">' + it.title + '</div><div class="stores"></div>';
             card.querySelector(".banner").onclick = function() { goStore("PriceOye", it.title); };
             card.querySelector(".title").onclick = function() { goStore("PriceOye", it.title); };
+            var stBox = card.querySelector(".stores");
+            buildAllPrices(it).forEach(function(st) {
+              var r = document.createElement("div");
+              r.className = "srow" + (st.low ? " low" : "");
+              r.innerHTML = "<span>" + st.s + (st.low ? " <b>(Lowest)</b>" : "") + "</span><b>" + st.p + "</b>";
+              r.onclick = function() { window.open(st.url, "_blank", "noopener,noreferrer"); };
+              stBox.appendChild(r);
+            });
+            grid.appendChild(card);
+          }
+        });
+        pageIdx++;
+        if (added > 0) {
+          status.textContent = "Scroll down to load more live products...";
+        } else {
+          status.textContent = "No more items for '" + q + "'. Try another keyword above!";
+        }
+      } catch (e) {
+        status.textContent = "Error: " + e.message;
+      }
+      busy = false;
+    }
+
+    fetchLiveBatch();
+    window.onscroll = function() {
