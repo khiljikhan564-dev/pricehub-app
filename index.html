@@ -12,17 +12,14 @@
     .top p { color: #94a3b8; font-size: 14px; margin-bottom: 16px; }
     .search-bar { display: flex; gap: 10px; max-width: 720px; margin: 0 auto 16px auto; }
     .search-bar input { flex: 1; padding: 13px 16px; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 15px; outline: none; }
-    .search-bar input:focus { border-color: #38bdf8; }
     .search-bar button { padding: 13px 22px; border-radius: 12px; border: none; background: #38bdf8; color: #0f172a; font-weight: 700; font-size: 15px; cursor: pointer; }
     .tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 1120px; margin: 0 auto 22px auto; }
     .tool-btn { padding: 8px 14px; border-radius: 999px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; font-size: 13px; font-weight: 600; cursor: pointer; }
     .tool-btn:hover, .tool-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
     .tool-btn.store-tool { border-color: #10b981; color: #6ee7b7; }
-    .tool-btn.store-tool:hover { background: #10b981; color: #064e3b; }
-    .err-box { max-width: 820px; margin: 0 auto 20px auto; background: #450a0a; border: 1px solid #ef4444; color: #fecaca; padding: 14px 18px; border-radius: 12px; font-size: 13.5px; display: none; text-align: left; white-space: pre-wrap; }
+    .err-box { max-width: 820px; margin: 0 auto 20px auto; background: #450a0a; border: 1px solid #ef4444; color: #fecaca; padding: 14px 18px; border-radius: 12px; font-size: 13.5px; display: none; white-space: pre-wrap; }
     .grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; padding: 14px; position: relative; display: flex; flex-direction: column; }
-    .card:hover { border-color: #38bdf8; }
     .live-badge { position: absolute; top: 20px; right: 20px; background: #10b981; color: #064e3b; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
     .banner { width: 100%; height: 155px; background: #ffffff; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 8px; cursor: pointer; }
     .banner img { width: 100%; height: 100%; object-fit: contain; }
@@ -30,7 +27,6 @@
     .title { font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 12px; line-height: 1.35; cursor: pointer; }
     .stores { display: flex; flex-direction: column; gap: 7px; margin-top: auto; }
     .srow { display: flex; justify-content: space-between; align-items: center; padding: 9px 11px; border-radius: 10px; background: #1e293b; border: 1px solid #334155; font-size: 12.5px; cursor: pointer; }
-    .srow:hover { border-color: #38bdf8; }
     .srow.low { background: #ecfdf5; border-color: #10b981; color: #064e3b; }
     .status { text-align: center; color: #94a3b8; margin: 22px 0; font-size: 14px; }
   </style>
@@ -41,26 +37,26 @@
     <p>Real-Time Live Products &amp; Prices Across PriceOye, Daraz, Shophive, Alibaba &amp; Amazon</p>
     <div class="search-bar">
       <input id="qInput" type="text" placeholder="Search live products (iPhone, Laptop, Watch, Shoes, Trimmer, TV)...">
-      <button onclick="runSearch()">Search Live</button>
+      <button id="searchBtn">Search Live</button>
     </div>
-    <div class="tools">
-      <button class="tool-btn active" onclick="pickTopic('all', this)">All Live Feed</button>
-      <button class="tool-btn" onclick="pickTopic('mobile', this)">Smartphones</button>
-      <button class="tool-btn" onclick="pickTopic('laptop', this)">Laptops</button>
-      <button class="tool-btn" onclick="pickTopic('watch', this)">Smart Watches</button>
-      <button class="tool-btn" onclick="pickTopic('earbuds', this)">Audio &amp; Buds</button>
-      <button class="tool-btn" onclick="pickTopic('gaming', this)">Gaming</button>
-      <button class="tool-btn" onclick="pickTopic('camera', this)">Cameras</button>
-      <button class="tool-btn" onclick="pickTopic('trimmer', this)">Tools &amp; Grooming</button>
-      <button class="tool-btn store-tool" onclick="goStore('Daraz Pakistan', '')">Daraz Live Tool</button>
-      <button class="tool-btn store-tool" onclick="goStore('Amazon Global', '')">Amazon Live Tool</button>
-      <button class="tool-btn store-tool" onclick="goStore('Alibaba Wholesale', '')">Alibaba Tool</button>
-      <button class="tool-btn store-tool" onclick="goStore('PriceOye', '')">PriceOye Tool</button>
+    <div class="tools" id="toolBar">
+      <button class="tool-btn active" data-topic="all">All Live Feed</button>
+      <button class="tool-btn" data-topic="mobile">Smartphones</button>
+      <button class="tool-btn" data-topic="laptop">Laptops</button>
+      <button class="tool-btn" data-topic="watch">Smart Watches</button>
+      <button class="tool-btn" data-topic="earbuds">Audio &amp; Buds</button>
+      <button class="tool-btn" data-topic="gaming">Gaming</button>
+      <button class="tool-btn" data-topic="camera">Cameras</button>
+      <button class="tool-btn" data-topic="trimmer">Tools &amp; Grooming</button>
+      <button class="tool-btn store-tool" data-store="Daraz Pakistan">Daraz Live Tool</button>
+      <button class="tool-btn store-tool" data-store="Amazon Global">Amazon Live Tool</button>
+      <button class="tool-btn store-tool" data-store="Alibaba Wholesale">Alibaba Tool</button>
+      <button class="tool-btn store-tool" data-store="PriceOye">PriceOye Tool</button>
     </div>
   </div>
   <div class="err-box" id="errBox"></div>
   <div class="grid" id="grid"></div>
-  <div class="status" id="status">Initializing engine...</div>
+  <div class="status" id="status">Loading live products...</div>
 
   <script>
     var STORES = {
@@ -75,16 +71,10 @@
     var pageIdx = 0;
     var busy = false;
 
-    window.onerror = function(msg, url, line) {
-      var box = document.getElementById("errBox");
-      box.style.display = "block";
-      box.textContent = "JS ERROR (Line " + line + "): " + msg;
-    };
-
     function showError(msg) {
       var box = document.getElementById("errBox");
       box.style.display = "block";
-      box.textContent = "BACKEND DIAGNOSTIC:\n" + msg;
+      box.textContent = "DIAGNOSTIC:\n" + msg;
     }
 
     function goStore(storeName, itemTitle) {
@@ -93,27 +83,35 @@
       window.open(base + encodeURIComponent(q), "_blank", "noopener,noreferrer");
     }
 
-    function pickTopic(t, btn) {
-      document.querySelectorAll(".tool-btn").forEach(function(b) { b.classList.remove("active"); });
-      if (btn) btn.classList.add("active");
-      mode = t;
-      pageIdx = 0;
-      document.getElementById("grid").innerHTML = "";
-      fetchLiveBatch();
-    }
-
-    function runSearch() {
+    document.getElementById("searchBtn").onclick = function() {
       var val = document.getElementById("qInput").value.trim();
       if (!val) return;
       mode = val;
       pageIdx = 0;
       document.getElementById("grid").innerHTML = "";
       fetchLiveBatch();
-    }
+    };
 
-    document.getElementById("qInput").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") runSearch();
-    });
+    document.getElementById("qInput").onkeydown = function(e) {
+      if (e.key === "Enter") document.getElementById("searchBtn").click();
+    };
+
+    document.getElementById("toolBar").onclick = function(e) {
+      var btn = e.target;
+      if (!btn.classList.contains("tool-btn")) return;
+      if (btn.dataset.store) {
+        goStore(btn.dataset.store, "");
+        return;
+      }
+      if (btn.dataset.topic) {
+        document.querySelectorAll(".tool-btn").forEach(function(b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        mode = btn.dataset.topic;
+        pageIdx = 0;
+        document.getElementById("grid").innerHTML = "";
+        fetchLiveBatch();
+      }
+    };
 
     async function fetchLiveBatch() {
       if (busy) return;
@@ -168,4 +166,11 @@
     }
 
     fetchLiveBatch();
-    window.addEventListener("scroll", function() {
+    window.onscroll = function() {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
+        if (mode === "all") fetchLiveBatch();
+      }
+    };
+  </script>
+</body>
+</html>
