@@ -79,19 +79,28 @@
       window.open(base + encodeURIComponent(q), "_blank", "noopener,noreferrer");
     }
 
+    function extractBasePkr(it) {
+      var found = 0;
+      if (Array.isArray(it.stores)) {
+        it.stores.forEach(function(st) {
+          if (!found && st && st.p) {
+            var digits = String(st.p).replace(/[^\d]/g, "");
+            if (digits) found = parseInt(digits, 10) || 0;
+          }
+        });
+      }
+      return found > 0 ? found : 12500;
+    }
+
     function buildAllPrices(it) {
       var enc = encodeURIComponent(it.title);
-      var basePkr = 14500;
-      if (it.stores && it.stores[0] && it.stores[0].p) {
-        var digits = String(it.stores[0].p).replace(/[^\d]/g, "");
-        if (digits) basePkr = parseInt(digits, 10) || 14500;
-      }
+      var basePkr = extractBasePkr(it);
       return [
-        { s: "Alibaba Wholesale", p: "Rs. " + Math.round(basePkr * 0.75).toLocaleString(), low: true, url: STORES["Alibaba Wholesale"] + enc },
+        { s: "Alibaba Wholesale", p: "Rs. " + Math.round(basePkr * 0.74).toLocaleString(), low: true, url: STORES["Alibaba Wholesale"] + enc },
         { s: "PriceOye", p: "Rs. " + basePkr.toLocaleString(), low: false, url: STORES["PriceOye"] + enc },
-        { s: "Daraz Pakistan", p: "Rs. " + Math.round(basePkr * 1.04).toLocaleString(), low: false, url: STORES["Daraz Pakistan"] + enc },
-        { s: "Shophive", p: "Rs. " + Math.round(basePkr * 1.07).toLocaleString(), low: false, url: STORES["Shophive"] + enc },
-        { s: "Amazon Global", p: "Rs. " + Math.round(basePkr * 1.13).toLocaleString(), low: false, url: STORES["Amazon Global"] + enc }
+        { s: "Daraz Pakistan", p: "Rs. " + Math.round(basePkr * 1.03).toLocaleString(), low: false, url: STORES["Daraz Pakistan"] + enc },
+        { s: "Shophive", p: "Rs. " + Math.round(basePkr * 1.06).toLocaleString(), low: false, url: STORES["Shophive"] + enc },
+        { s: "Amazon Global", p: "Rs. " + Math.round(basePkr * 1.12).toLocaleString(), low: false, url: STORES["Amazon Global"] + enc }
       ];
     }
 
@@ -150,7 +159,7 @@
           var lists = await Promise.all(batchTopics.map(fetchOneQuery));
           for (var round = 0; round < 3; round++) {
             for (var c = 0; c < lists.length; c++) {
-              var cand = lists[c][round];
+              var cand = lists.at(c) ? lists.at(c).at(round) : null;
               if (cand && !seenTitles[cand.title]) {
                 seenTitles[cand.title] = true;
                 finalItems.push(cand);
@@ -176,5 +185,3 @@
             card.querySelector(".title").onclick = function() { goStore("PriceOye", it.title); };
             var stBox = card.querySelector(".stores");
             buildAllPrices(it).forEach(function(st) {
-              var r = document.createElement("div");
-              r.className = "srow" + (st.low ? " low" : "");
