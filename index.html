@@ -57,7 +57,7 @@
     </div>
   </div>
   <div class="grid" id="grid"></div>
-  <div class="status" id="status">Starting live engine...</div>
+  <div class="status" id="status">Loading live products...</div>
 
   <script>
     var STORES = {
@@ -70,46 +70,23 @@
     var TOPICS = ["mobile", "watch", "laptop", "shoes", "bag", "sunglasses", "earbuds", "trimmer", "camera", "speaker", "power bank", "tv"];
     var seen = {};
     var mode = "all";
-    var page = 0;
+    var pageIdx = 0;
     var busy = false;
 
-    function openStore(name, title) {
-      var q = title || document.getElementById("qInput").value.trim() || "mobile";
-      window.open((STORES[name] || STORES["Daraz Pakistan"]) + encodeURIComponent(q), "_blank");
-    }
-
-    function getPriceNum(it) {
-      if (!it || !it.stores || !it.stores.length) return 12500;
-      var s = String(it.stores.p || "");
-      var out = "";
-      for (var i = 0; i < s.length; i++) {
-        var c = s.charAt(i);
-        if (c >= "0" && c <= "9") out += c;
-      }
-      return parseInt(out, 10) || 12500;
-    }
-
-    function makeStoreRows(it) {
-      var enc = encodeURIComponent(it.title);
-      var pkr = getPriceNum(it);
-      var dUrl = (it.stores && it.stores.length && it.stores.url) ? it.stores.url : (STORES["Daraz Pakistan"] + enc);
-      return [
-        { s: "Alibaba Wholesale", p: "Rs. " + Math.round(pkr * 0.74).toLocaleString(), low: true, url: STORES["Alibaba Wholesale"] + enc },
-        { s: "Daraz Pakistan (Live)", p: "Rs. " + pkr.toLocaleString(), low: false, url: dUrl },
-        { s: "PriceOye", p: "Rs. " + Math.round(pkr * 1.02).toLocaleString(), low: false, url: STORES["PriceOye"] + enc },
-        { s: "Shophive", p: "Rs. " + Math.round(pkr * 1.05).toLocaleString(), low: false, url: STORES["Shophive"] + enc },
-        { s: "Amazon Global", p: "Rs. " + Math.round(pkr * 1.12).toLocaleString(), low: false, url: STORES["Amazon Global"] + enc }
-      ];
+    function goStore(storeName, itemTitle) {
+      var q = itemTitle || document.getElementById("qInput").value.trim() || "mobile";
+      var base = STORES[storeName] || STORES["Daraz Pakistan"];
+      window.open(base + encodeURIComponent(q), "_blank", "noopener,noreferrer");
     }
 
     document.getElementById("searchBtn").onclick = function() {
       var val = document.getElementById("qInput").value.trim();
       if (!val) return;
       mode = val;
-      page = 0;
+      pageIdx = 0;
       seen = {};
       document.getElementById("grid").innerHTML = "";
-      loadNext();
+      fetchLiveBatch();
     };
 
     document.getElementById("qInput").onkeydown = function(e) {
@@ -119,63 +96,80 @@
     document.getElementById("toolBar").onclick = function(e) {
       var btn = e.target;
       if (!btn.classList.contains("tool-btn")) return;
-      if (btn.getAttribute("data-store")) {
-        openStore(btn.getAttribute("data-store"), "");
+      if (btn.dataset.store) {
+        goStore(btn.dataset.store, "");
         return;
       }
-      var top = btn.getAttribute("data-topic");
-      if (top) {
-        var allBtns = document.querySelectorAll(".tool-btn");
-        for (var i = 0; i < allBtns.length; i++) allBtns.item(i).classList.remove("active");
+      if (btn.dataset.topic) {
+        document.querySelectorAll(".tool-btn").forEach(function(b) { b.classList.remove("active"); });
         btn.classList.add("active");
-        mode = top;
-        page = 0;
+        mode = btn.dataset.topic;
+        pageIdx = 0;
         seen = {};
         document.getElementById("grid").innerHTML = "";
-        loadNext();
+        fetchLiveBatch();
       }
     };
 
-    function loadNext() {
+    async function fetchLiveBatch() {
       if (busy) return;
       busy = true;
       var status = document.getElementById("status");
       var grid = document.getElementById("grid");
-      var q = mode === "all" ? TOPICS[page % TOPICS.length] : mode;
-      status.textContent = "Fetching live '" + q + "' prices...";
-
-      fetch("/api/live?q=" + encodeURIComponent(q))
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          var list = (data && data.products) ? data.products : [];
-          var added = 0;
-          for (var i = 0; i < list.length; i++) {
-            var it = list.slice(i, i + 1).pop();
-            if (it && !seen[it.title]) {
-              seen[it.title] = true;
-              added++;
-              var card = document.createElement("div");
-              card.className = "card";
-              card.innerHTML = '<span class="live-badge">LIVE</span><div class="banner"><img src="' + it.img + '" alt=""></div><div class="title">' + it.title + '</div><div class="stores"></div>';
-              (function(titleText) {
-                card.querySelector(".banner").onclick = function() { openStore("Daraz Pakistan", titleText); };
-                card.querySelector(".title").onclick = function() { openStore("Daraz Pakistan", titleText); };
-              })(it.title);
-              var stBox = card.querySelector(".stores");
-              var rows = makeStoreRows(it);
-              for (var j = 0; j < rows.length; j++) {
-                var st = rows.slice(j, j + 1).pop();
+      var q = mode === "all" ? TOPICS[pageIdx % TOPICS.length] : mode;
+      status.textContent = "Fetching live '" + q + "' from backend...";
+      try {
+        var res = await fetch("/api/live?q=" + encodeURIComponent(q));
+        var data = await res.json();
+        var list = (data && data.products) ? data.products : [];
+        var added = 0;
+        list.forEach(function(it) {
+          if (it && !seen[it.title]) {
+            seen[it.title] = true;
+            added++;
+            var card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = '<span class="live-badge">LIVE</span><div class="banner"><img src="' + it.img + '" alt=""></div><div class="title">' + it.title + '</div><div class="stores"></div>';
+            card.querySelector(".banner").onclick = function() { goStore("Daraz Pakistan", it.title); };
+            card.querySelector(".title").onclick = function() { goStore("Daraz Pakistan", it.title); };
+            var stBox = card.querySelector(".stores");
+            if (it.stores && it.stores.forEach) {
+              it.stores.forEach(function(st) {
                 var r = document.createElement("div");
-                r.className = "srow" + (st.low ? " low" : "");
-                r.innerHTML = "<span>" + st.s + (st.low ? " <b>(Lowest)</b>" : "") + "</span><b>" + st.p + "</b>";
-                (function(targetUrl) {
-                  r.onclick = function() { window.open(targetUrl, "_blank"); };
-                })(st.url);
+                r.className = "srow" + (st.l ? " low" : "");
+                r.innerHTML = "<span>" + st.s + (st.l ? " <b>(Lowest)</b>" : "") + "</span><b>" + st.p + "</b>";
+                r.onclick = function() {
+                  if (st.url && st.url.indexOf("http") === 0) window.open(st.url, "_blank", "noopener,noreferrer");
+                  else goStore(st.s, it.title);
+                };
                 stBox.appendChild(r);
-              }
-              grid.appendChild(card);
+              });
             }
+            grid.appendChild(card);
           }
-          page++;
+        });
+        pageIdx++;
+        if (added > 0) {
+          status.textContent = "Scroll down to load more live products...";
+        } else if (mode === "all" && pageIdx < TOPICS.length) {
           busy = false;
-          if (added > 0) {
+          fetchLiveBatch();
+          return;
+        } else {
+          status.textContent = "No more items for '" + q + "'. Try another keyword!";
+        }
+      } catch (e) {
+        status.textContent = "Error: " + e.message;
+      }
+      busy = false;
+    }
+
+    fetchLiveBatch();
+    window.onscroll = function() {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
+        if (mode === "all") fetchLiveBatch();
+      }
+    };
+  </script>
+</body>
+</html>
