@@ -81,7 +81,7 @@
 
     function extractBasePkr(it) {
       var found = 0;
-      if (Array.isArray(it.stores)) {
+      if (it && it.stores && it.stores.length) {
         it.stores.forEach(function(st) {
           if (!found && st && st.p) {
             var digits = String(st.p).replace(/[^\d]/g, "");
@@ -158,13 +158,15 @@
           }
           var lists = await Promise.all(batchTopics.map(fetchOneQuery));
           for (var round = 0; round < 3; round++) {
-            for (var c = 0; c < lists.length; c++) {
-              var cand = lists.at(c) ? lists.at(c).at(round) : null;
-              if (cand && !seenTitles[cand.title]) {
-                seenTitles[cand.title] = true;
-                finalItems.push(cand);
+            lists.forEach(function(subList) {
+              if (subList && subList.length > round) {
+                var cand = subList.slice(round, round + 1).pop();
+                if (cand && !seenTitles[cand.title]) {
+                  seenTitles[cand.title] = true;
+                  finalItems.push(cand);
+                }
               }
-            }
+            });
           }
         } else {
           var singleList = await fetchOneQuery(mode);
@@ -183,5 +185,3 @@
             card.innerHTML = '<span class="live-badge">LIVE</span><div class="banner"><img src="' + it.img + '" alt=""></div><div class="title">' + it.title + '</div><div class="stores"></div>';
             card.querySelector(".banner").onclick = function() { goStore("PriceOye", it.title); };
             card.querySelector(".title").onclick = function() { goStore("PriceOye", it.title); };
-            var stBox = card.querySelector(".stores");
-            buildAllPrices(it).forEach(function(st) {
