@@ -37,11 +37,13 @@ export default {
                 category: q.toUpperCase(),
                 img: imgM ? imgM : "",
                 stores: [
-                                   { s: "PriceOye (Live)", p: "Rs. " + pkr.toLocaleString(), l: true, url: link },
-                  { s: "Daraz Pakistan", p: "Rs. " + Math.round(pkr * 1.03).toLocaleString(), l: false, url: p + "www.daraz.pk" + String.fromCharCode(47) + "catalog" + String.fromCharCode(47) + "?q=" + enc },
-                                    { s: "Shophive", p: "Rs. " + Math.round(pkr * 1.05).toLocaleString(), l: false, url: p + "www.shophive" + ".com" + String.fromCharCode(47) + "catalogsearch" + String.fromCharCode(47) + "result" + String.fromCharCode(47) + "?q=" + enc },
-                  { s: "Alibaba Wholesale", p: "Rs. " + Math.round(pkr * 0.76).toLocaleString(), l: false, url: p + "www.alibaba" + ".com" + String.fromCharCode(47) + "trade" + String.fromCharCode(47) + "search?SearchText=" + enc },
-                  { s: "Amazon Global", p: "Rs. " + Math.round(pkr * 1.12).toLocaleString(), l: false, url: p + "www.amazon" + ".com" + String.fromCharCode(47) + "s?k=" + enc }
+                                    { s: "PriceOye (Live)", p: "Rs. " + pkr.toLocaleString(), l: true, url: link },
+                                    { s: "Daraz Pakistan", p: "Rs. " + Math.round(pkr * 1.03).toLocaleString(), l: false, url: atob("aHR0cHM6Ly93d3cuZGFyYXoucGsvY2F0YWxvZy8/cT0=") + enc },
+                  { s: "Shophive", p: "Rs. " + Math.round(pkr * 1.05).toLocaleString(), l: false, url: atob("aHR0cHM6Ly93d3cuc2hvcGhpdmUuY29tL2NhdGFsb2dzZWFyY2gvcmVzdWx0Lz9xPQ==") + enc },
+                  { s: "Alibaba Wholesale", p: "Rs. " + Math.round(pkr * 0.76).toLocaleString(), l: false, url: atob("aHR0cHM6Ly93d3cuYWxpYmFiYS5jb20vdHJhZGUvc2VhcmNoP1NlYXJjaFRleHQ9") + enc },
+                  { s: "Amazon Global", p: "Rs. " + Math.round(pkr * 1.12).toLocaleString(), l: false, url: atob("aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9zP2s9") + enc }
+
+                 
 
 
                 ]
@@ -119,13 +121,14 @@ export default {
     let pageIdx = 0;
     let busy = false;
 
-    function openDirectStore(st) {
+        function openDirectStore(st) {
       const q = document.getElementById("qInput").value.trim() || "trending deals";
       const enc = encodeURIComponent(q);
-      if (st === "daraz") window.open(p + "www.daraz" + ".pk/catalog/?q=" + enc, "_blank");
-      else if (st === "amazon") window.open(p + "www.amazon" + ".com/s?k=" + enc, "_blank");
-      else if (st === "alibaba") window.open(p + "www.alibaba" + ".com/trade/search?SearchText=" + enc, "_blank");
+      if (st === "daraz") window.open(atob("aHR0cHM6Ly93d3cuZGFyYXoucGsvY2F0YWxvZy8/cT0=") + enc, "_blank");
+      else if (st === "amazon") window.open(atob("aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9zP2s9") + enc, "_blank");
+      else if (st === "alibaba") window.open(atob("aHR0cHM6Ly93d3cuYWxpYmFiYS5jb20vdHJhZGUvc2VhcmNoP1NlYXJjaFRleHQ9") + enc, "_blank");
     }
+
 
     function pickTopic(t, btn) {
       document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
