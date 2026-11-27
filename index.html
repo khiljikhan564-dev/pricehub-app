@@ -1,104 +1,117 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#1a73e8">
-  <title>PriceHub Global - Compare Worldwide Prices</title>
-  <link rel="icon" type="image/png" href="https://flaticon.com">
+  <title>PriceHub Global - Multi-Store Live Engine</title>
   <style>
-    body{font-family:system-ui,sans-serif;background:#f4f6f9;margin:0;padding:16px}
-    .box{max-width:720px;margin:auto;background:#fff;padding:20px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
-    .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
-    h2{margin:0;color:#1a73e8}
-    .apk-btn{background:#0f9d58;color:#fff;padding:9px 14px;text-decoration:none;border-radius:8px;font-weight:bold;font-size:13px}
-    .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-    select,input,button{padding:11px;border-radius:8px;border:1px solid #ccc;font-size:15px}
-    input{flex:1;min-width:160px}
-    button{background:#1a73e8;color:#fff;border:none;cursor:pointer;font-weight:bold}
-    .card{display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid #eee;border-radius:10px;margin-top:10px;background:#fafafa}
-    .price{font-size:18px;font-weight:bold;color:#0f9d58}
-    .btn{background:#ff9900;color:#fff;padding:9px 15px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px}
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background: #0b1120; color: #f8fafc; min-height: 100vh; padding: 24px 16px; }
+    .top { max-width: 1280px; margin: 0 auto 20px auto; text-align: center; }
+    .top h1 { color: #38bdf8; font-size: 32px; margin-bottom: 6px; }
+    .top p { color: #94a3b8; font-size: 14px; margin-bottom: 16px; }
+    .search-bar { display: flex; gap: 10px; max-width: 720px; margin: 0 auto 16px auto; }
+    .search-bar input { flex: 1; padding: 13px 16px; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 15px; outline: none; }
+    .search-bar input:focus { border-color: #38bdf8; }
+    .search-bar button { padding: 13px 22px; border-radius: 12px; border: none; background: #38bdf8; color: #0f172a; font-weight: 700; font-size: 15px; cursor: pointer; }
+    .tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 1120px; margin: 0 auto 22px auto; }
+    .tool-btn { padding: 8px 14px; border-radius: 999px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .tool-btn:hover, .tool-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+    .tool-btn.store-tool { border-color: #10b981; color: #6ee7b7; }
+    .tool-btn.store-tool:hover { background: #10b981; color: #064e3b; }
+    .grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+    .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; padding: 14px; position: relative; display: flex; flex-direction: column; }
+    .card:hover { border-color: #38bdf8; }
+    .badge-off { position: absolute; top: 20px; right: 20px; background: #ef4444; color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
+    .banner { width: 100%; height: 155px; background: #ffffff; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 8px; cursor: pointer; }
+    .banner img { width: 100%; height: 100%; object-fit: contain; }
+    .cat { align-self: flex-start; background: #1e293b; color: #38bdf8; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-bottom: 8px; }
+    .title { font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 12px; line-height: 1.35; cursor: pointer; }
+    .stores { display: flex; flex-direction: column; gap: 7px; margin-top: auto; }
+    .srow { display: flex; justify-content: space-between; align-items: center; padding: 9px 11px; border-radius: 10px; background: #1e293b; border: 1px solid #334155; font-size: 12.5px; cursor: pointer; }
+    .srow:hover { border-color: #38bdf8; }
+    .srow.low { background: #ecfdf5; border-color: #10b981; color: #064e3b; }
   </style>
 </head>
 <body>
-<div class="box">
   <div class="top">
-    <h2>PriceHub Global</h2>
-    <a class="apk-btn" href="https://huggingface.co">Download Android App (APK)</a>
-  </div>
-  <div class="row">
-    <select id="country" onchange="search()">
-      <option value="PK">Pakistan (PKR)</option>
-      <option value="US">USA (USD)</option>
-      <option value="AE">UAE (AED)</option>
-      <option value="SA">Saudi Arabia (SAR)</option>
-      <option value="GB">UK (GBP)</option>
-      <option value="IN">India (INR)</option>
-      <option value="DE">Germany (EUR)</option>
-    </select>
-    <input id="q" value="Smart Watch" placeholder="Search any product..." onkeyup="if(event.key==='Enter')search()">
-    <button onclick="search()">Search</button>
-  </div>
-  <div id="list"></div>
-</div>
-<script>
-const DATA = {
-  PK: [
-    {s:"Daraz Pakistan", p:"Rs. 4,250", d:"2-4 Days", u:q=>`https://daraz.pk{q}`},
-    {s:"AliExpress", p:"Rs. 3,100", d:"10-18 Days", u:q=>`https://aliexpress.com{q}`},
-    {s:"Amazon Global", p:"Rs. 6,900", d:"3-6 Days", u:q=>`https://amazon.com{q}`},
-    {s:"Alibaba Wholesale", p:"Rs. 2,150", d:"7-15 Days", u:q=>`https://alibaba.com{q}`},
-    {s:"Temu Pakistan", p:"Rs. 2,890", d:"6-12 Days", u:q=>`https://temu.com{q}`}
-  ],
-  US: [
-    {s:"Amazon USA", p:"$24.99", d:"1-2 Days", u:q=>`https://amazon.com{q}`},
-    {s:"Walmart", p:"$22.50", d:"2 Days", u:q=>`https://walmart.com{q}`},
-    {s:"eBay Global", p:"$19.99", d:"3-5 Days", u:q=>`https://ebay.com{q}`},
-    {s:"AliExpress", p:"$11.20", d:"10-15 Days", u:q=>`https://aliexpress.com{q}`},
-    {s:"Alibaba Wholesale", p:"$7.80", d:"7-12 Days", u:q=>`https://alibaba.com{q}`}
-  ],
-  AE: [
-    {s:"Noon UAE", p:"AED 89", d:"Same Day", u:q=>`https://noon.com{q}`},
-    {s:"Amazon.ae", p:"AED 95", d:"1 Day", u:q=>`https://amazon.ae{q}`},
-    {s:"AliExpress", p:"AED 42", d:"8-14 Days", u:q=>`https://aliexpress.com{q}`},
-    {s:"Alibaba Wholesale", p:"AED 29", d:"7-12 Days", u:q=>`https://alibaba.com{q}`}
-  ],
-  SA: [
-    {s:"Noon KSA", p:"SAR 92", d:"1-2 Days", u:q=>`https://noon.com{q}`},
-    {s:"Amazon.sa", p:"SAR 99", d:"1-2 Days", u:q=>`https://amazon.sa{q}`},
-    {s:"AliExpress", p:"SAR 44", d:"8-15 Days", u:q=>`https://aliexpress.com{q}`}
-  ],
-  GB: [
-    {s:"Amazon UK", p:"£21.99", d:"1 Day", u:q=>`https://amazon.co.uk{q}`},
-    {s:"eBay UK", p:"£18.50", d:"2-4 Days", u:q=>`https://ebay.co.uk{q}`},
-    {s:"AliExpress", p:"£9.80", d:"8-14 Days", u:q=>`https://aliexpress.com{q}`}
-  ],
-  IN: [
-    {s:"Flipkart", p:"₹1,899", d:"2-3 Days", u:q=>`https://flipkart.com{q}`},
-    {s:"Amazon.in", p:"₹2,099", d:"1-2 Days", u:q=>`https://amazon.in{q}`},
-    {s:"Alibaba Wholesale", p:"₹690", d:"7-15 Days", u:q=>`https://alibaba.com{q}`}
-  ],
-  DE: [
-    {s:"Amazon.de", p:"€23.99", d:"1-2 Days", u:q=>`https://amazon.de{q}`},
-    {s:"eBay.de", p:"€19.90", d:"2-4 Days", u:q=>`https://ebay.de{q}`},
-    {s:"AliExpress", p:"€10.50", d:"8-14 Days", u:q=>`https://aliexpress.com{q}`}
-  ]
-};
-function search(){
-  const c = document.getElementById("country").value;
-  const raw = document.getElementById("q").value.trim() || "Smart Watch";
-  const q = encodeURIComponent(raw);
-  document.getElementById("list").innerHTML = (DATA[c]||DATA.US).map(x => `
-    <div class="card">
-      <div><b>${x.s} (${raw})</b><br><small>Delivery: ${x.d}</small></div>
-      <div class="price">${x.p}</div>
-      <a class="btn" href="${x.u(q)}" target="_blank" rel="noopener noreferrer">Open Store</a>
+    <h1>PriceHub Global — Multi-Store Live Engine</h1>
+    <p>Compare Live Prices &amp; Search Directly Across Daraz, PriceOye, Shophive, Alibaba &amp; Amazon</p>
+    <div class="search-bar">
+      <input id="qInput" type="text" placeholder="Type any product (iPhone, Laptop, Watch, Shoes, Trimmer, TV, Drone)...">
+      <button onclick="filterItems()">Search</button>
     </div>
-  `).join("");
-}
-search();
-</script>
-</body>
-</html>
+    <div class="tools">
+      <button class="tool-btn active" onclick="filterCat('ALL', this)">All Categories</button>
+      <button class="tool-btn" onclick="filterCat('Smartphones', this)">Smartphones</button>
+      <button class="tool-btn" onclick="filterCat('Laptops', this)">Laptops</button>
+      <button class="tool-btn" onclick="filterCat('Smart Watches', this)">Smart Watches</button>
+      <button class="tool-btn" onclick="filterCat('Audio & Buds', this)">Audio &amp; Buds</button>
+      <button class="tool-btn" onclick="filterCat('Gaming Consoles', this)">Gaming</button>
+      <button class="tool-btn" onclick="filterCat('Cameras', this)">Cameras</button>
+      <button class="tool-btn store-tool" onclick="goStore('Daraz Pakistan', '')">Daraz Live Tool ↗</button>
+      <button class="tool-btn store-tool" onclick="goStore('Amazon Global', '')">Amazon Live Tool ↗</button>
+      <button class="tool-btn store-tool" onclick="goStore('Alibaba Wholesale', '')">Alibaba Tool ↗</button>
+      <button class="tool-btn store-tool" onclick="goStore('PriceOye', '')">PriceOye Tool ↗</button>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
 
+  <script>
+    const U_IMG = atob("aHR0cHM6Ly9pbWFnZXMudW5zcGxhc2guY29tLw==");
+    const STORES = {
+      "Daraz Pakistan": atob("aHR0cHM6Ly93d3cuZGFyYXoucGsvY2F0YWxvZy8/cT0="),
+      "PriceOye": atob("aHR0cHM6Ly9wcmljZW95ZS5way9zZWFyY2g/cT0="),
+      "Shophive": atob("aHR0cHM6Ly93d3cuc2hvcGhpdmUuY29tL2NhdGFsb2dzZWFyY2gvcmVzdWx0Lz9xPQ=="),
+      "Alibaba Wholesale": atob("aHR0cHM6Ly93d3cuYWxpYmFiYS5jb20vdHJhZGUvc2VhcmNoP1NlYXJjaFRleHQ9"),
+      "Amazon Global": atob("aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9zP2s9")
+    };
+
+    const BASE_ITEMS = [
+      { title: "Apple iPhone 17 Pro (256GB PTA)", cat: "Smartphones", pkr: 442400, off: "-10% OFF", img: U_IMG + "photo-1511707171634-5f897ff02aa9?w=400&q=80" },
+      { title: "HP Victus 15 RTX Gaming Laptop", cat: "Laptops", pkr: 254800, off: "-11% OFF", img: U_IMG + "photo-1603302576837-37561b2e2302?w=400&q=80" },
+      { title: "Zero Luna AMOLED Smart Watch", cat: "Smart Watches", pkr: 5320, off: "-75% OFF", img: U_IMG + "photo-1523275335684-37898b6baf30?w=400&q=80" },
+      { title: "Apple AirPods Pro 3 (2025 ANC)", cat: "Audio & Buds", pkr: 64960, off: "-29% OFF", img: U_IMG + "photo-1606220588913-b3aacb4d2f46?w=400&q=80" },
+      { title: "Jinpeng Rush Electric Scooter", cat: "Electric Scooters", pkr: 259840, off: "-14% OFF", img: U_IMG + "photo-1558981403-c5f9899a28bc?w=400&q=80" },
+      { title: "Sony PlayStation 5 Slim (1TB)", cat: "Gaming Consoles", pkr: 168280, off: "-8% OFF", img: U_IMG + "photo-1606813907291-d86efa9b94db?w=400&q=80" },
+      { title: "Samsung Galaxy Tab S10 FE Plus", cat: "Tablets", pkr: 169960, off: "-6% OFF", img: U_IMG + "photo-1544244015-0df4b3ffc6b0?w=400&q=80" },
+      { title: "Canon EOS R50 4K Mirrorless Camera", cat: "Cameras", pkr: 213920, off: "-12% OFF", img: U_IMG + "photo-1516035069371-29a1b244cc32?w=400&q=80" },
+      { title: "JBL Flip 6 Waterproof Speaker", cat: "Audio & Buds", pkr: 28840, off: "-18% OFF", img: U_IMG + "photo-1608043152269-423dbba4e7e1?w=400&q=80" },
+      { title: "Nike Air Max Running Sneakers", cat: "Men's Shoes", pkr: 23800, off: "-22% OFF", img: U_IMG + "photo-1542291026-7eec264c27ff?w=400&q=80" },
+      { title: "Ray-Ban Aviator Classic Sunglasses", cat: "Eyewear", pkr: 18200, off: "-15% OFF", img: U_IMG + "photo-1572635196237-14b3f281503f?w=400&q=80" },
+      { title: "Leather Executive Travel Backpack", cat: "Bags & Luggage", pkr: 13440, off: "-30% OFF", img: U_IMG + "photo-1553062407-98eeb64c6a62?w=400&q=80" },
+      { title: "DeLonghi Espresso Coffee Machine", cat: "Kitchen Appliances", pkr: 95200, off: "-17% OFF", img: U_IMG + "photo-1517668808822-9ebb02f2a0e6?w=400&q=80" },
+      { title: "Ergonomic Mesh Office Gaming Chair", cat: "Home & Office", pkr: 54600, off: "-24% OFF", img: U_IMG + "photo-1592078615290-033ee584e267?w=400&q=80" },
+      { title: "DJI Mini 4 Pro 4K Camera Drone", cat: "Cameras", pkr: 249200, off: "-9% OFF", img: U_IMG + "photo-1507582020474-9a35b7d455d9?w=400&q=80" },
+      { title: "Logitech MX Master 3S Wireless Mouse", cat: "PC Accessories", pkr: 27440, off: "-14% OFF", img: U_IMG + "photo-1527864550417-7fd91fc51a46?w=400&q=80" }
+    ];
+
+    let activeCat = "ALL";
+    let pageNum = 0;
+
+    function goStore(storeName, itemTitle) {
+      const q = itemTitle || document.getElementById("qInput").value.trim() || "trending deals";
+      const base = STORES[storeName] || STORES["Daraz Pakistan"];
+      window.open(base + encodeURIComponent(q), "_blank", "noopener,noreferrer");
+    }
+
+    function renderBatch(reset) {
+      const grid = document.getElementById("grid");
+      if (reset) { grid.innerHTML = ""; pageNum = 0; }
+      const searchTxt = document.getElementById("qInput").value.trim().toLowerCase();
+      const filtered = BASE_ITEMS.filter(it => {
+        const matchCat = activeCat === "ALL" || it.cat === activeCat;
+        const matchTxt = !searchTxt || it.title.toLowerCase().includes(searchTxt) || it.cat.toLowerCase().includes(searchTxt);
+        return matchCat && matchTxt;
+      });
+      if (filtered.length === 0 && searchTxt) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;"><h3>Search "' + searchTxt + '" Live Across Stores:</h3><p style="margin:12px 0;color:#94a3b8;">Click any store below to view real-time prices:</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;"><button class="tool-btn store-tool" onclick="goStore(\'Daraz Pakistan\',\'\')">Open on Daraz ↗</button><button class="tool-btn store-tool" onclick="goStore(\'PriceOye\',\'\')">Open on PriceOye ↗</button><button class="tool-btn store-tool" onclick="goStore(\'Amazon Global\',\'\')">Open on Amazon ↗</button><button class="tool-btn store-tool" onclick="goStore(\'Alibaba Wholesale\',\'\')">Open on Alibaba ↗</button></div></div>';
+        return;
+      }
+      const suffixes = ["", " (2026 Edition)", " - Pro Variant", " - Official Warranty", " - Bundle Pack"];
+      const suf = suffixes[pageNum % suffixes.length];
+      filtered.forEach(it => {
+        const pkr = Math.round(it.pkr * (1 + pageNum * 0.03));
+        const card = document.createElement("div");
+        card.className = "card";
+S
