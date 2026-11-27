@@ -2,6 +2,23 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (url.pathname === "/api/img") {
+      const target = url.searchParams.get("u");
+      if (!target) return new Response("Missing", { status: 400 });
+      try {
+        const imgRes = await fetch(target);
+        return new Response(imgRes.body, {
+          headers: {
+            "Content-Type": imgRes.headers.get("Content-Type") || "image/webp",
+            "Cache-Control": "public, max-age=86400",
+            "Access-Control-Allow-Origin": "*"
+          }
+        });
+      } catch (e) {
+        return new Response("Err", { status: 502 });
+      }
+    }
+
     if (url.pathname === "/api/live") {
       const q = (url.searchParams.get("q") || "phone").trim();
       const cors = {
@@ -25,10 +42,12 @@ export default {
           const title = it.title || "Product";
           const pkr = Math.round((it.price || 50) * 280);
           const enc = encodeURIComponent(title);
+          const rawImg = it.thumbnail || "";
+          const proxiedImg = rawImg ? ("/api/img?u=" + encodeURIComponent(rawImg)) : "";
           items.push({
             title,
             category: (it.category || q).toUpperCase(),
-            img: it.thumbnail || "",
+            img: proxiedImg,
             stores: [
               { s: "Alibaba Wholesale", p: "Rs. " + Math.round(pkr * 0.74).toLocaleString(), l: true, url: atob("aHR0cHM6Ly93d3cuYWxpYmFiYS5jb20vdHJhZGUvc2VhcmNoP1NlYXJjaFRleHQ9") + enc },
               { s: "PriceOye (Live)", p: "Rs. " + pkr.toLocaleString(), l: false, url: atob("aHR0cHM6Ly9wcmljZW95ZS5way9zZWFyY2g/cT0=") + enc },
