@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PriceHub Global - Live Multi-Store Engine</title>
+  <title>PriceHub Global - 100,000+ Live Store Engine</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
     body { background: #0b1120; color: #f8fafc; min-height: 100vh; padding: 24px 16px; }
@@ -15,7 +15,7 @@
     .search-bar input:focus { border-color: #38bdf8; }
     .search-bar button { padding: 13px 22px; border-radius: 12px; border: none; background: #38bdf8; color: #0f172a; font-weight: 700; font-size: 15px; cursor: pointer; }
     .tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 1120px; margin: 0 auto 22px auto; }
-    .tool-btn { padding: 8px 14px; border-radius: 999px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .tool-btn { padding: 8px 14px; border-radius: 999px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; font-size: 13px; font-weight: 600; cursor: pointer; }
     .tool-btn:hover, .tool-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
     .tool-btn.store-tool { border-color: #10b981; color: #6ee7b7; }
     .tool-btn.store-tool:hover { background: #10b981; color: #064e3b; }
@@ -40,55 +40,61 @@
     <h1>PriceHub Global — 100,000+ Live Store Engine</h1>
     <p>Real-Time Live Products &amp; Prices Across PriceOye, Daraz, Shophive, Alibaba &amp; Amazon</p>
     <div class="search-bar">
-      <input id="qInput" type="text" placeholder="Search 100,000+ live products (e.g. iPhone, Laptop, Watch, Shoes, Trimmer, TV)...">
+      <input id="qInput" type="text" placeholder="Search live products (iPhone, Laptop, Watch, Shoes, Trimmer, TV)...">
       <button onclick="runSearch()">Search Live</button>
     </div>
     <div class="tools">
       <button class="tool-btn active" onclick="pickTopic('all', this)">All Live Feed</button>
       <button class="tool-btn" onclick="pickTopic('mobile', this)">Smartphones</button>
       <button class="tool-btn" onclick="pickTopic('laptop', this)">Laptops</button>
-      <button class="tool-btn" onclick="pickTopic('smart watch', this)">Smart Watches</button>
+      <button class="tool-btn" onclick="pickTopic('watch', this)">Smart Watches</button>
       <button class="tool-btn" onclick="pickTopic('earbuds', this)">Audio &amp; Buds</button>
       <button class="tool-btn" onclick="pickTopic('gaming', this)">Gaming</button>
       <button class="tool-btn" onclick="pickTopic('camera', this)">Cameras</button>
       <button class="tool-btn" onclick="pickTopic('trimmer', this)">Tools &amp; Grooming</button>
-      <button class="tool-btn store-tool" onclick="goStore('Daraz Pakistan', '')">Daraz Live Tool ↗</button>
-      <button class="tool-btn store-tool" onclick="goStore('Amazon Global', '')">Amazon Live Tool ↗</button>
-      <button class="tool-btn store-tool" onclick="goStore('Alibaba Wholesale', '')">Alibaba Tool ↗</button>
-      <button class="tool-btn store-tool" onclick="goStore('PriceOye', '')">PriceOye Tool ↗</button>
+      <button class="tool-btn store-tool" onclick="goStore('Daraz Pakistan', '')">Daraz Live Tool</button>
+      <button class="tool-btn store-tool" onclick="goStore('Amazon Global', '')">Amazon Live Tool</button>
+      <button class="tool-btn store-tool" onclick="goStore('Alibaba Wholesale', '')">Alibaba Tool</button>
+      <button class="tool-btn store-tool" onclick="goStore('PriceOye', '')">PriceOye Tool</button>
     </div>
   </div>
   <div class="err-box" id="errBox"></div>
   <div class="grid" id="grid"></div>
-  <div class="status" id="status">Connecting to live backend engine...</div>
+  <div class="status" id="status">Initializing engine...</div>
 
   <script>
-    const STORES = {
+    var STORES = {
       "Daraz Pakistan": atob("aHR0cHM6Ly93d3cuZGFyYXoucGsvY2F0YWxvZy8/cT0="),
       "PriceOye": atob("aHR0cHM6Ly9wcmljZW95ZS5way9zZWFyY2g/cT0="),
       "Shophive": atob("aHR0cHM6Ly93d3cuc2hvcGhpdmUuY29tL2NhdGFsb2dzZWFyY2gvcmVzdWx0Lz9xPQ=="),
       "Alibaba Wholesale": atob("aHR0cHM6Ly93d3cuYWxpYmFiYS5jb20vdHJhZGUvc2VhcmNoP1NlYXJjaFRleHQ9"),
       "Amazon Global": atob("aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9zP2s9")
     };
-    const TOPICS = ["mobile", "laptop", "smart watch", "earbuds", "tablet", "gaming", "camera", "speaker", "power bank", "tv", "trimmer", "router", "iphone", "samsung", "xiaomi", "infinix", "hp", "dell", "airpods", "charger"];
-    let mode = "all";
-    let pageIdx = 0;
-    let busy = false;
+    var TOPICS = ["mobile", "laptop", "watch", "earbuds", "tablet", "gaming", "camera", "speaker", "power bank", "tv", "trimmer", "iphone", "samsung", "xiaomi", "hp", "dell", "airpods", "charger"];
+    var mode = "all";
+    var pageIdx = 0;
+    var busy = false;
+
+    window.onerror = function(msg, url, line) {
+      var box = document.getElementById("errBox");
+      box.style.display = "block";
+      box.textContent = "JS ERROR (Line " + line + "): " + msg;
+    };
 
     function showError(msg) {
-      const box = document.getElementById("errBox");
+      var box = document.getElementById("errBox");
       box.style.display = "block";
-      box.textContent = "LIVE BACKEND DIAGNOSTIC:\n" + msg;
+      box.textContent = "BACKEND DIAGNOSTIC:\n" + msg;
     }
 
     function goStore(storeName, itemTitle) {
-      const q = itemTitle || document.getElementById("qInput").value.trim() || "trending deals";
-      const base = STORES[storeName] || STORES["Daraz Pakistan"];
+      var q = itemTitle || document.getElementById("qInput").value.trim() || "trending deals";
+      var base = STORES[storeName] || STORES["Daraz Pakistan"];
       window.open(base + encodeURIComponent(q), "_blank", "noopener,noreferrer");
     }
 
     function pickTopic(t, btn) {
-      document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tool-btn").forEach(function(b) { b.classList.remove("active"); });
       if (btn) btn.classList.add("active");
       mode = t;
       pageIdx = 0;
@@ -97,7 +103,7 @@
     }
 
     function runSearch() {
-      const val = document.getElementById("qInput").value.trim();
+      var val = document.getElementById("qInput").value.trim();
       if (!val) return;
       mode = val;
       pageIdx = 0;
@@ -105,49 +111,43 @@
       fetchLiveBatch();
     }
 
-    document.getElementById("qInput").addEventListener("keydown", e => { if (e.key === "Enter") runSearch(); });
+    document.getElementById("qInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") runSearch();
+    });
 
     async function fetchLiveBatch() {
       if (busy) return;
       busy = true;
-      const status = document.getElementById("status");
-      const errBox = document.getElementById("errBox");
+      var status = document.getElementById("status");
+      var errBox = document.getElementById("errBox");
       errBox.style.display = "none";
-      const query = mode === "all" ? TOPICS[pageIdx % TOPICS.length] : mode;
+      var query = mode === "all" ? TOPICS[pageIdx % TOPICS.length] : mode;
       status.textContent = "Fetching live '" + query + "' from backend...";
       try {
-        const res = await fetch("/api/live?q=" + encodeURIComponent(query));
-        const rawText = await res.text();
+        var res = await fetch("/api/live?q=" + encodeURIComponent(query));
+        var rawText = await res.text();
         if (!res.ok) {
-          showError("HTTP Status: " + res.status + " " + res.statusText + "\nEndpoint: /api/live?q=" + query + "\nServer Response: " + rawText.slice(0, 300));
-          status.textContent = "Backend returned HTTP " + res.status;
+          showError("HTTP " + res.status + ": " + rawText.slice(0, 250));
+          status.textContent = "Backend HTTP " + res.status;
           busy = false;
           return;
         }
-        let data;
-        try {
-          data = JSON.parse(rawText);
-        } catch (parseErr) {
-          showError("Backend did not return JSON (Worker routing not active yet).\nRaw Response: " + rawText.slice(0, 300));
-          status.textContent = "Invalid response format from /api/live";
-          busy = false;
-          return;
-        }
-        const grid = document.getElementById("grid");
+        var data = JSON.parse(rawText);
+        var grid = document.getElementById("grid");
         if (data.products && data.products.length > 0) {
-          data.products.forEach(it => {
-            const card = document.createElement("div");
+          data.products.forEach(function(it) {
+            var card = document.createElement("div");
             card.className = "card";
             card.innerHTML = '<span class="live-badge">LIVE</span><div class="banner"><img src="' + it.img + '" alt=""></div><div class="cat">' + it.category + '</div><div class="title">' + it.title + '</div><div class="stores"></div>';
-            card.querySelector(".banner").onclick = () => goStore("PriceOye", it.title);
-            card.querySelector(".title").onclick = () => goStore("PriceOye", it.title);
-            const stBox = card.querySelector(".stores");
-            it.stores.forEach(st => {
-              const r = document.createElement("div");
+            card.querySelector(".banner").onclick = function() { goStore("PriceOye", it.title); };
+            card.querySelector(".title").onclick = function() { goStore("PriceOye", it.title); };
+            var stBox = card.querySelector(".stores");
+            it.stores.forEach(function(st) {
+              var r = document.createElement("div");
               r.className = "srow" + (st.l ? " low" : "");
               r.innerHTML = "<span>" + st.s + (st.l ? " <b>(Lowest)</b>" : "") + "</span><b>" + st.p + "</b>";
-              r.onclick = () => {
-                if (st.url && st.url.startsWith("http")) window.open(st.url, "_blank", "noopener,noreferrer");
+              r.onclick = function() {
+                if (st.url && st.url.indexOf("http") === 0) window.open(st.url, "_blank", "noopener,noreferrer");
                 else goStore(st.s.replace(" (Live)", ""), it.title);
               };
               stBox.appendChild(r);
@@ -157,7 +157,15 @@
           pageIdx++;
           status.textContent = "Scroll down to load more real-time live products...";
         } else {
-          showError("Backend connected OK, but 0 products matched for '" + query + "'.\nJSON Debug: " + JSON.stringify(data));
-          status.textContent = "0 live items returned for '" + query + "'.";
+          showError("Backend connected OK, but 0 items returned for '" + query + "'.\nResponse: " + JSON.stringify(data));
+          status.textContent = "0 live items for '" + query + "'.";
         }
       } catch (e) {
+        showError("Error: " + e.message);
+        status.textContent = "Error loading live feed.";
+      }
+      busy = false;
+    }
+
+    fetchLiveBatch();
+    window.addEventListener("scroll", function() {
