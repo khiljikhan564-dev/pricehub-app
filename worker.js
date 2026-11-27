@@ -37,11 +37,13 @@ export default {
                 category: q.toUpperCase(),
                 img: imgM ? imgM : "",
                 stores: [
-                  { s: "PriceOye (Live)", p: "Rs. " + pkr.toLocaleString(), l: true, url: link },
-                  { s: "Daraz Pakistan", p: "Rs. " + Math.round(pkr * 1.03).toLocaleString(), l: false, url: p + "www.daraz" + ".pk/catalog/?q=" + enc },
-                  { s: "Shophive", p: "Rs. " + Math.round(pkr * 1.05).toLocaleString(), l: false, url: p + "www.shophive" + ".com/catalogsearch/result/?q=" + enc },
-                  { s: "Alibaba Wholesale", p: "Rs. " + Math.round(pkr * 0.76).toLocaleString(), l: false, url: p + "www.alibaba" + ".com/trade/search?SearchText=" + enc },
-                  { s: "Amazon Global", p: "Rs. " + Math.round(pkr * 1.12).toLocaleString(), l: false, url: p + "www.amazon" + ".com/s?k=" + enc }
+                                   { s: "PriceOye (Live)", p: "Rs. " + pkr.toLocaleString(), l: true, url: link },
+                  { s: "Daraz Pakistan", p: "Rs. " + Math.round(pkr * 1.03).toLocaleString(), l: false, url: p + "www.daraz.pk" + String.fromCharCode(47) + "catalog" + String.fromCharCode(47) + "?q=" + enc },
+                                    { s: "Shophive", p: "Rs. " + Math.round(pkr * 1.05).toLocaleString(), l: false, url: p + "www.shophive" + ".com" + String.fromCharCode(47) + "catalogsearch" + String.fromCharCode(47) + "result" + String.fromCharCode(47) + "?q=" + enc },
+                  { s: "Alibaba Wholesale", p: "Rs. " + Math.round(pkr * 0.76).toLocaleString(), l: false, url: p + "www.alibaba" + ".com" + String.fromCharCode(47) + "trade" + String.fromCharCode(47) + "search?SearchText=" + enc },
+                  { s: "Amazon Global", p: "Rs. " + Math.round(pkr * 1.12).toLocaleString(), l: false, url: p + "www.amazon" + ".com" + String.fromCharCode(47) + "s?k=" + enc }
+
+
                 ]
               });
             }
