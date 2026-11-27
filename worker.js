@@ -3,17 +3,23 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/live") {
-      const q = (url.searchParams.get("q") || "mobile").trim();
+      const q = (url.searchParams.get("q") || "phone").trim();
       const cors = {
         "Access-Control-Allow-Origin": "*",
         "Content-Type": "application/json"
       };
       const items = [];
       try {
-        const apiUrl = atob("aHR0cHM6Ly9kdW1teWpzb24uY29tL3Byb2R1Y3RzL3NlYXJjaD9xPQ==") + encodeURIComponent(q) + "&limit=30";
-        const res = await fetch(apiUrl);
-        const data = await res.json();
-        const list = data.products || [];
+        const baseApi = atob("aHR0cHM6Ly9kdW1teWpzb24uY29tL3Byb2R1Y3Rz");
+        let res = await fetch(baseApi + "/search?q=" + encodeURIComponent(q) + "&limit=30");
+        let data = await res.json();
+        let list = data.products || [];
+        if (list.length === 0) {
+          const skip = Math.floor(Math.random() * 140);
+          res = await fetch(baseApi + "?limit=24&skip=" + skip);
+          data = await res.json();
+          list = data.products || [];
+        }
         for (let i = 0; i < list.length; i++) {
           const it = list[i];
           const title = it.title || "Product";
