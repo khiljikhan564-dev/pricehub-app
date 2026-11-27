@@ -43,7 +43,7 @@
     </div>
     <div class="tools" id="toolBar">
       <button class="tool-btn active" data-topic="all">All Live Feed</button>
-      <button class="tool-btn" data-topic="phone">Smartphones</button>
+      <button class="tool-btn" data-topic="mobile">Smartphones</button>
       <button class="tool-btn" data-topic="laptop">Laptops</button>
       <button class="tool-btn" data-topic="watch">Smart Watches</button>
       <button class="tool-btn" data-topic="earbuds">Audio &amp; Buds</button>
@@ -67,14 +67,14 @@
       "Alibaba Wholesale": atob("aHR0cHM6Ly93d3cuYWxpYmFiYS5jb20vdHJhZGUvc2VhcmNoP1NlYXJjaFRleHQ9"),
       "Amazon Global": atob("aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9zP2s9")
     };
-    var TOPICS = ["trending", "watch", "phone", "laptop", "shoes", "bag", "sunglasses", "perfume", "shirt", "kitchen", "sports", "tablet"];
+    var TOPICS = ["mobile", "watch", "laptop", "shoes", "bag", "sunglasses", "earbuds", "trimmer", "camera", "speaker", "power bank", "tv"];
     var seenTitles = {};
     var mode = "all";
     var pageIdx = 0;
     var busy = false;
 
     function goStore(storeName, itemTitle) {
-      var q = itemTitle || document.getElementById("qInput").value.trim() || "trending deals";
+      var q = itemTitle || document.getElementById("qInput").value.trim() || "mobile";
       var base = STORES[storeName] || STORES["Daraz Pakistan"];
       window.open(base + encodeURIComponent(q), "_blank", "noopener,noreferrer");
     }
@@ -95,11 +95,12 @@
     function buildAllPrices(it) {
       var enc = encodeURIComponent(it.title);
       var basePkr = extractBasePkr(it);
+      var darazUrl = (it.stores && it.stores.length && it.stores[0].url) ? it.stores[0].url : (STORES["Daraz Pakistan"] + enc);
       return [
         { s: "Alibaba Wholesale", p: "Rs. " + Math.round(basePkr * 0.74).toLocaleString(), low: true, url: STORES["Alibaba Wholesale"] + enc },
-        { s: "PriceOye", p: "Rs. " + basePkr.toLocaleString(), low: false, url: STORES["PriceOye"] + enc },
-        { s: "Daraz Pakistan", p: "Rs. " + Math.round(basePkr * 1.03).toLocaleString(), low: false, url: STORES["Daraz Pakistan"] + enc },
-        { s: "Shophive", p: "Rs. " + Math.round(basePkr * 1.06).toLocaleString(), low: false, url: STORES["Shophive"] + enc },
+        { s: "Daraz Pakistan (Live)", p: "Rs. " + basePkr.toLocaleString(), low: false, url: darazUrl },
+        { s: "PriceOye", p: "Rs. " + Math.round(basePkr * 1.02).toLocaleString(), low: false, url: STORES["PriceOye"] + enc },
+        { s: "Shophive", p: "Rs. " + Math.round(basePkr * 1.05).toLocaleString(), low: false, url: STORES["Shophive"] + enc },
         { s: "Amazon Global", p: "Rs. " + Math.round(basePkr * 1.12).toLocaleString(), low: false, url: STORES["Amazon Global"] + enc }
       ];
     }
@@ -155,8 +156,8 @@
             var card = document.createElement("div");
             card.className = "card";
             card.innerHTML = '<span class="live-badge">LIVE</span><div class="banner"><img src="' + it.img + '" alt=""></div><div class="title">' + it.title + '</div><div class="stores"></div>';
-            card.querySelector(".banner").onclick = function() { goStore("PriceOye", it.title); };
-            card.querySelector(".title").onclick = function() { goStore("PriceOye", it.title); };
+            card.querySelector(".banner").onclick = function() { goStore("Daraz Pakistan", it.title); };
+            card.querySelector(".title").onclick = function() { goStore("Daraz Pakistan", it.title); };
             var stBox = card.querySelector(".stores");
             buildAllPrices(it).forEach(function(st) {
               var r = document.createElement("div");
@@ -171,14 +172,8 @@
         pageIdx++;
         if (added > 0) {
           status.textContent = "Scroll down to load more live products...";
+        } else if (mode === "all" && pageIdx < TOPICS.length) {
+          busy = false;
+          fetchLiveBatch();
+          return;
         } else {
-          status.textContent = "No more items for '" + q + "'. Try another keyword above!";
-        }
-      } catch (e) {
-        status.textContent = "Error: " + e.message;
-      }
-      busy = false;
-    }
-
-    fetchLiveBatch();
-    window.onscroll = function() {
