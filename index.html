@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PriceHub Global - 100,000+ Live Store Engine</title>
+  <title>PriceHub Global - Live Multi-Store Engine</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
     body { background: #0b1120; color: #f8fafc; min-height: 100vh; padding: 24px 16px; }
@@ -19,6 +19,7 @@
     .tool-btn:hover, .tool-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
     .tool-btn.store-tool { border-color: #10b981; color: #6ee7b7; }
     .tool-btn.store-tool:hover { background: #10b981; color: #064e3b; }
+    .err-box { max-width: 820px; margin: 0 auto 20px auto; background: #450a0a; border: 1px solid #ef4444; color: #fecaca; padding: 14px 18px; border-radius: 12px; font-size: 13.5px; display: none; text-align: left; white-space: pre-wrap; }
     .grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; padding: 14px; position: relative; display: flex; flex-direction: column; }
     .card:hover { border-color: #38bdf8; }
@@ -37,9 +38,9 @@
 <body>
   <div class="top">
     <h1>PriceHub Global — 100,000+ Live Store Engine</h1>
-    <p>Real-Time Live Products &amp; Prices Scraped Directly From Pakistani &amp; Global Stores</p>
+    <p>Real-Time Live Products &amp; Prices Across PriceOye, Daraz, Shophive, Alibaba &amp; Amazon</p>
     <div class="search-bar">
-      <input id="qInput" type="text" placeholder="Search 100,000+ live products (e.g. iPhone 16, Laptop, Watch, Shoes, Trimmer, AC, TV)...">
+      <input id="qInput" type="text" placeholder="Search 100,000+ live products (e.g. iPhone, Laptop, Watch, Shoes, Trimmer, TV)...">
       <button onclick="runSearch()">Search Live</button>
     </div>
     <div class="tools">
@@ -57,6 +58,7 @@
       <button class="tool-btn store-tool" onclick="goStore('PriceOye', '')">PriceOye Tool ↗</button>
     </div>
   </div>
+  <div class="err-box" id="errBox"></div>
   <div class="grid" id="grid"></div>
   <div class="status" id="status">Connecting to live backend engine...</div>
 
@@ -72,6 +74,12 @@
     let mode = "all";
     let pageIdx = 0;
     let busy = false;
+
+    function showError(msg) {
+      const box = document.getElementById("errBox");
+      box.style.display = "block";
+      box.textContent = "LIVE BACKEND DIAGNOSTIC:\n" + msg;
+    }
 
     function goStore(storeName, itemTitle) {
       const q = itemTitle || document.getElementById("qInput").value.trim() || "trending deals";
@@ -103,11 +111,28 @@
       if (busy) return;
       busy = true;
       const status = document.getElementById("status");
+      const errBox = document.getElementById("errBox");
+      errBox.style.display = "none";
       const query = mode === "all" ? TOPICS[pageIdx % TOPICS.length] : mode;
-      status.textContent = "Scraping real-time live '" + query + "' products from stores...";
+      status.textContent = "Fetching live '" + query + "' from backend...";
       try {
         const res = await fetch("/api/live?q=" + encodeURIComponent(query));
-        const data = await res.json();
+        const rawText = await res.text();
+        if (!res.ok) {
+          showError("HTTP Status: " + res.status + " " + res.statusText + "\nEndpoint: /api/live?q=" + query + "\nServer Response: " + rawText.slice(0, 300));
+          status.textContent = "Backend returned HTTP " + res.status;
+          busy = false;
+          return;
+        }
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (parseErr) {
+          showError("Backend did not return JSON (Worker routing not active yet).\nRaw Response: " + rawText.slice(0, 300));
+          status.textContent = "Invalid response format from /api/live";
+          busy = false;
+          return;
+        }
         const grid = document.getElementById("grid");
         if (data.products && data.products.length > 0) {
           data.products.forEach(it => {
@@ -132,20 +157,7 @@
           pageIdx++;
           status.textContent = "Scroll down to load more real-time live products...";
         } else {
-          status.textContent = "No live results for '" + query + "'. Try searching another keyword above!";
+          showError("Backend connected OK, but 0 products matched for '" + query + "'.\nJSON Debug: " + JSON.stringify(data));
+          status.textContent = "0 live items returned for '" + query + "'.";
         }
       } catch (e) {
-        status.textContent = "Live backend syncing — refresh in 10 seconds.";
-      }
-      busy = false;
-    }
-
-    fetchLiveBatch();
-    window.addEventListener("scroll", () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
-        if (mode === "all") fetchLiveBatch();
-      }
-    });
-  </script>
-</body>
-</html>
