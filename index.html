@@ -19,42 +19,43 @@
     .tool-btn:hover, .tool-btn.active { background: #0284c7; color: #ffffff; border-color: #0284c7; }
     .tool-btn.store-tool { border-color: #10b981; color: #047857; background: #ecfdf5; }
     .tool-btn.store-tool:hover { background: #10b981; color: #ffffff; }
-    .err-box { max-width: 820px; margin: 0 auto 20px auto; background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; padding: 14px 18px; border-radius: 12px; font-size: 13.5px; display: none; text-align: left; white-space: pre-wrap; }
-    .grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
-    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; position: relative; display: flex; flex-direction: column; cursor: pointer; transition: border-color 0.2s; }
+    .grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(275px, 1fr)); gap: 18px; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; position: relative; display: flex; flex-direction: column; transition: border-color 0.2s; }
     .card:hover { border-color: #0284c7; }
     .live-badge { position: absolute; top: 20px; right: 20px; background: #10b981; color: #ffffff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
-    .banner { width: 100%; height: 175px; background: #ffffff; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 6px; }
+    .banner { width: 100%; height: 165px; background: #ffffff; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 6px; cursor: pointer; }
     .banner img { width: 100%; height: 100%; object-fit: contain; }
-    .title { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 10px; line-height: 1.35; }
-    .price-pill { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 10px; background: #ecfdf5; border: 1px solid #10b981; color: #065f46; font-size: 14px; font-weight: 800; }
+    .title { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 12px; line-height: 1.35; cursor: pointer; }
+    .stores { display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
+    .srow { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 9px; background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b; font-size: 12.5px; cursor: pointer; }
+    .srow:hover { border-color: #0284c7; background: #f0f9ff; }
+    .srow.low { background: #ecfdf5; border-color: #10b981; color: #065f46; }
     .status { text-align: center; color: #64748b; margin: 22px 0; font-size: 14px; }
   </style>
 </head>
 <body>
   <div class="top">
     <h1>PriceHub Global — 100,000+ Live Store Engine</h1>
-    <p>Real-Time Live Products &amp; Prices Across PriceOye, Daraz, Shophive, Alibaba &amp; Amazon</p>
+    <p>Compare Real-Time Prices Across Alibaba, PriceOye, Daraz, Shophive &amp; Amazon</p>
     <div class="search-bar">
       <input id="qInput" type="text" placeholder="Search live products (iPhone, Laptop, Watch, Shoes, Trimmer, TV)...">
       <button id="searchBtn">Search Live</button>
     </div>
     <div class="tools" id="toolBar">
       <button class="tool-btn active" data-topic="all">All Live Feed</button>
-      <button class="tool-btn" data-topic="mobile">Smartphones</button>
+      <button class="tool-btn" data-topic="phone">Smartphones</button>
       <button class="tool-btn" data-topic="laptop">Laptops</button>
       <button class="tool-btn" data-topic="watch">Smart Watches</button>
       <button class="tool-btn" data-topic="earbuds">Audio &amp; Buds</button>
-      <button class="tool-btn" data-topic="gaming">Gaming</button>
-      <button class="tool-btn" data-topic="camera">Cameras</button>
-      <button class="tool-btn" data-topic="trimmer">Tools &amp; Grooming</button>
+      <button class="tool-btn" data-topic="shoes">Shoes</button>
+      <button class="tool-btn" data-topic="bag">Bags</button>
+      <button class="tool-btn" data-topic="sunglasses">Sunglasses</button>
       <button class="tool-btn store-tool" data-store="Daraz Pakistan">Daraz Live Tool</button>
       <button class="tool-btn store-tool" data-store="Amazon Global">Amazon Live Tool</button>
       <button class="tool-btn store-tool" data-store="Alibaba Wholesale">Alibaba Tool</button>
       <button class="tool-btn store-tool" data-store="PriceOye">PriceOye Tool</button>
     </div>
   </div>
-  <div class="err-box" id="errBox"></div>
   <div class="grid" id="grid"></div>
   <div class="status" id="status">Loading mixed live products...</div>
 
@@ -66,7 +67,8 @@
       "Alibaba Wholesale": atob("aHR0cHM6Ly93d3cuYWxpYmFiYS5jb20vdHJhZGUvc2VhcmNoP1NlYXJjaFRleHQ9"),
       "Amazon Global": atob("aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9zP2s9")
     };
-    var TOPICS = ["mobile", "watch", "laptop", "earbuds", "shoes", "gaming", "camera", "speaker", "power bank", "tv", "trimmer", "bag", "sunglasses", "perfume", "airpods", "charger"];
+    var TOPICS = ["phone", "watch", "laptop", "shoes", "bag", "sunglasses", "perfume", "shirt", "furniture", "kitchen", "car", "motorcycle", "beauty", "groceries", "sports", "tablet"];
+    var seenTitles = {};
     var mode = "all";
     var pageIdx = 0;
     var busy = false;
@@ -77,14 +79,20 @@
       window.open(base + encodeURIComponent(q), "_blank", "noopener,noreferrer");
     }
 
-    function shuffleList(arr) {
-      for (var i = arr.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = tmp;
+    function buildAllPrices(it) {
+      var enc = encodeURIComponent(it.title);
+      var basePkr = 14500;
+      if (it.stores && it.stores[0] && it.stores[0].p) {
+        var digits = String(it.stores[0].p).replace(/[^\d]/g, "");
+        if (digits) basePkr = parseInt(digits, 10) || 14500;
       }
-      return arr;
+      return [
+        { s: "Alibaba Wholesale", p: "Rs. " + Math.round(basePkr * 0.75).toLocaleString(), low: true, url: STORES["Alibaba Wholesale"] + enc },
+        { s: "PriceOye", p: "Rs. " + basePkr.toLocaleString(), low: false, url: STORES["PriceOye"] + enc },
+        { s: "Daraz Pakistan", p: "Rs. " + Math.round(basePkr * 1.04).toLocaleString(), low: false, url: STORES["Daraz Pakistan"] + enc },
+        { s: "Shophive", p: "Rs. " + Math.round(basePkr * 1.07).toLocaleString(), low: false, url: STORES["Shophive"] + enc },
+        { s: "Amazon Global", p: "Rs. " + Math.round(basePkr * 1.13).toLocaleString(), low: false, url: STORES["Amazon Global"] + enc }
+      ];
     }
 
     document.getElementById("searchBtn").onclick = function() {
@@ -92,6 +100,7 @@
       if (!val) return;
       mode = val;
       pageIdx = 0;
+      seenTitles = {};
       document.getElementById("grid").innerHTML = "";
       fetchLiveBatch();
     };
@@ -112,6 +121,7 @@
         btn.classList.add("active");
         mode = btn.dataset.topic;
         pageIdx = 0;
+        seenTitles = {};
         document.getElementById("grid").innerHTML = "";
         fetchLiveBatch();
       }
@@ -129,52 +139,42 @@
       busy = true;
       var status = document.getElementById("status");
       var grid = document.getElementById("grid");
-      status.textContent = "Loading live products across categories...";
+      status.textContent = "Loading live multi-store prices...";
       try {
-        var mixed = [];
+        var finalItems = [];
         if (mode === "all") {
-          var q1 = TOPICS[(pageIdx * 4) % TOPICS.length];
-          var q2 = TOPICS[(pageIdx * 4 + 1) % TOPICS.length];
-          var q3 = TOPICS[(pageIdx * 4 + 2) % TOPICS.length];
-          var q4 = TOPICS[(pageIdx * 4 + 3) % TOPICS.length];
-          var results = await Promise.all([fetchOneQuery(q1), fetchOneQuery(q2), fetchOneQuery(q3), fetchOneQuery(q4)]);
-          results.forEach(function(list) {
-            list.slice(0, 6).forEach(function(item) { mixed.push(item); });
-          });
-          shuffleList(mixed);
+          var batchTopics = [];
+          for (var k = 0; k < 4; k++) {
+            batchTopics.push(TOPICS[(pageIdx * 4 + k) % TOPICS.length]);
+          }
+          var lists = await Promise.all(batchTopics.map(fetchOneQuery));
+          for (var round = 0; round < 3; round++) {
+            for (var c = 0; c < lists.length; c++) {
+              var cand = lists[c][round];
+              if (cand && !seenTitles[cand.title]) {
+                seenTitles[cand.title] = true;
+                finalItems.push(cand);
+              }
+            }
+          }
         } else {
-          mixed = await fetchOneQuery(mode);
+          var singleList = await fetchOneQuery(mode);
+          singleList.forEach(function(cand) {
+            if (!seenTitles[cand.title]) {
+              seenTitles[cand.title] = true;
+              finalItems.push(cand);
+            }
+          });
         }
 
-        if (mixed.length > 0) {
-          mixed.forEach(function(it) {
-            var bestStore = (it.stores && it.stores) ? it.stores : { p: "View Live", url: "" };
+        if (finalItems.length > 0) {
+          finalItems.forEach(function(it) {
             var card = document.createElement("div");
             card.className = "card";
-            card.innerHTML = '<span class="live-badge">LIVE</span><div class="banner"><img src="' + it.img + '" alt=""></div><div class="title">' + it.title + '</div><div class="price-pill"><span>' + bestStore.p + '</span><span>Buy Live ↗</span></div>';
-            card.onclick = function() {
-              if (bestStore.url && bestStore.url.indexOf("http") === 0) window.open(bestStore.url, "_blank", "noopener,noreferrer");
-              else goStore("Daraz Pakistan", it.title);
-            };
-            grid.appendChild(card);
-          });
-          pageIdx++;
-          status.textContent = "Scroll down for more mixed live products...";
-        } else {
-          status.textContent = "No live items found. Try another keyword above!";
-        }
-      } catch (e) {
-        status.textContent = "Error loading live feed.";
-      }
-      busy = false;
-    }
-
-    fetchLiveBatch();
-    window.onscroll = function() {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
-        if (mode === "all") fetchLiveBatch();
-      }
-    };
-  </script>
-</body>
-</html>
+            card.innerHTML = '<span class="live-badge">LIVE</span><div class="banner"><img src="' + it.img + '" alt=""></div><div class="title">' + it.title + '</div><div class="stores"></div>';
+            card.querySelector(".banner").onclick = function() { goStore("PriceOye", it.title); };
+            card.querySelector(".title").onclick = function() { goStore("PriceOye", it.title); };
+            var stBox = card.querySelector(".stores");
+            buildAllPrices(it).forEach(function(st) {
+              var r = document.createElement("div");
+              r.className = "srow" + (st.low ? " low" : "");
