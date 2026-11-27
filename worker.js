@@ -1,6 +1,10 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/sitemap.xml") {
+      const xml = atob("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHVybHNldCB4bWxucz0iaHR0cDovL3d3dy5zaXRlbWFwcy5vcmcvc2NoZW1hcy9zaXRlbWFwLzAuOSI+CiAgPHVybD4KICAgIDxsb2M+aHR0cHM6Ly9wcmljZWh1Yi1hcHAua2hpbGppa2hhbjU2NC53b3JrZXJzLmRldi88L2xvYz4KICAgIDxwcmlvcml0eT4xLjA8L3ByaW9yaXR5PgogIDwvdXJsPgo8L3VybHNldD4=");
+      return new Response(xml, { headers: { "Content-Type": "application/xml" } });
+    }
 
     if (url.pathname === "/api/img") {
       const target = url.searchParams.get("u");
